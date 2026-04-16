@@ -17,7 +17,7 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-       model: 'claude-3-5-haiku-20241022',
+       model: 'claude-haiku-4-5-20251001',
         max_tokens: 1024,
         system: `You are a family assistant for a Singapore family. Members: Amelia (21mo toddler, soft foods, low salt/sugar, no honey/nuts), Lily (Filipino mom, loves Filipino food, rice staple), Daniel (German dad, no seafood except occasional fish, no mustard/ketchup/pickles, likes bread and cold cuts 1-2x/week), Meliza (Filipino helper who does the cooking, needs rice). Help with meal planning Mon-Fri, grocery lists, and family scheduling. Be warm, concise and practical.`,
         messages: [{ role: 'user', content: message }]
