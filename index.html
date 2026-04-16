@@ -12,73 +12,66 @@
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; overflow: hidden; }
     body { font-family: -apple-system, system-ui, sans-serif; background: #faf7f2; display: flex; flex-direction: column; color: #1c1c1c; }
-
     header { background: #1c1c1c; color: white; padding: 14px 20px 12px; padding-top: max(14px, env(safe-area-inset-top)); }
     header h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
     header p { font-size: 11px; color: #9ca3af; margin-top: 2px; letter-spacing: 1px; text-transform: uppercase; }
-
     .tabs { display: flex; background: #1c1c1c; padding: 0 12px; gap: 4px; }
-    .tab { flex: 1; padding: 10px 8px; background: transparent; border: none; color: #9ca3af; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; border-bottom: 2px solid transparent; }
+    .tab { flex: 1; padding: 10px 6px; background: transparent; border: none; color: #9ca3af; font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; border-bottom: 2px solid transparent; }
     .tab.active { color: white; border-bottom-color: #a78bfa; }
-
     .view { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; }
     .view.active { display: flex; flex-direction: column; }
-
-    /* CHAT VIEW */
     #messages { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
     .msg { max-width: 88%; padding: 10px 14px; border-radius: 18px; font-size: 14px; line-height: 1.55; word-wrap: break-word; animation: slideIn 0.25s ease; }
     @keyframes slideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     .user { background: #1c1c1c; color: white; align-self: flex-end; border-bottom-right-radius: 5px; }
     .assistant { background: white; color: #1c1c1c; align-self: flex-start; border-bottom-left-radius: 5px; border: 1px solid #f0ebe3; padding: 14px 16px; max-width: 92%; }
-    .assistant h1, .assistant h2, .assistant h3 { font-weight: 700; margin: 12px 0 6px; color: #111; }
-    .assistant h1:first-child, .assistant h2:first-child, .assistant h3:first-child { margin-top: 0; }
+    .assistant h2, .assistant h3 { font-weight: 700; margin: 12px 0 6px; }
     .assistant h2 { font-size: 15px; }
     .assistant h3 { font-size: 14px; color: #c2410c; }
     .assistant p { margin-bottom: 8px; }
-    .assistant p:last-child { margin-bottom: 0; }
     .assistant ul, .assistant ol { margin: 6px 0 10px 20px; }
     .assistant li { margin-bottom: 4px; }
     .assistant strong { font-weight: 600; }
     .assistant em { color: #6b7280; font-style: italic; }
     .assistant blockquote { border-left: 3px solid #f59e0b; background: #fef3c7; padding: 8px 12px; margin: 8px 0; border-radius: 0 6px 6px 0; font-size: 13px; color: #92400e; }
     .assistant hr { border: none; border-top: 1px solid #f0ebe3; margin: 12px 0; }
-
     .typing { align-self: flex-start; background: white; padding: 12px 16px; border-radius: 18px; border: 1px solid #f0ebe3; display: flex; gap: 4px; }
     .typing span { width: 7px; height: 7px; border-radius: 50%; background: #d1d5db; animation: bounce 1.2s infinite; }
     .typing span:nth-child(2) { animation-delay: 0.15s; }
     .typing span:nth-child(3) { animation-delay: 0.3s; }
     @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-5px); opacity: 1; } }
-
     .suggestions { display: flex; gap: 8px; padding: 0 16px 10px; overflow-x: auto; scrollbar-width: none; }
     .suggestions::-webkit-scrollbar { display: none; }
     .chip { background: white; border: 1.5px solid #e5e7eb; border-radius: 20px; padding: 7px 14px; font-size: 13px; white-space: nowrap; color: #374151; cursor: pointer; flex-shrink: 0; font-weight: 500; }
-    .chip:active { background: #f9fafb; border-color: #1c1c1c; }
-
     footer { background: white; border-top: 1px solid #e5e7eb; padding: 10px 12px; padding-bottom: max(10px, env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: flex-end; }
     textarea { flex: 1; border: 1.5px solid #e5e7eb; border-radius: 22px; padding: 11px 16px; font-size: 15px; font-family: inherit; resize: none; outline: none; max-height: 120px; line-height: 1.4; background: #f9fafb; }
     textarea:focus { border-color: #1c1c1c; background: white; }
-    .send-btn { background: #1c1c1c; color: white; border: none; border-radius: 50%; width: 42px; height: 42px; font-size: 20px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+    .send-btn { background: #1c1c1c; color: white; border: none; border-radius: 50%; width: 42px; height: 42px; font-size: 20px; cursor: pointer; flex-shrink: 0; }
     .send-btn:disabled { opacity: 0.3; }
-
-    /* CALENDAR VIEW */
+    .action-bar { display: flex; gap: 8px; padding: 12px 16px 4px; position: sticky; top: 0; background: #faf7f2; z-index: 10; }
+    .action-btn { flex: 1; background: white; border: 1.5px solid #1c1c1c; color: #1c1c1c; border-radius: 22px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .action-btn.primary { background: #25d366; border-color: #25d366; color: white; }
+    .action-btn.purple { background: #f3f0ff; border-color: #c4b5fd; color: #5b21b6; }
+    .action-btn.blue { background: #1c1c1c; border-color: #1c1c1c; color: white; }
     .calendar-wrap { padding: 16px; }
     .calendar-header { background: #1c1c1c; color: white; border-radius: 14px; padding: 14px 18px; margin-bottom: 12px; }
     .calendar-theme { font-size: 15px; font-style: italic; color: #a78bfa; }
     .calendar-week { font-size: 12px; color: #9ca3af; margin-top: 3px; }
     .day-card { background: white; border-radius: 14px; margin-bottom: 10px; overflow: hidden; border: 1px solid #f0ebe3; }
     .day-header { padding: 11px 15px; border-bottom: 1px solid #f0ebe3; font-size: 15px; font-weight: 700; background: #faf7f2; }
-    .meal-row { padding: 11px 15px; border-bottom: 1px solid #f9f6f2; cursor: pointer; }
+    .meal-row { padding: 11px 15px; border-bottom: 1px solid #f9f6f2; }
     .meal-row:last-child { border-bottom: none; }
     .meal-type { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #9ca3af; margin-bottom: 3px; }
     .meal-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
     .meal-meta { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
     .cuisine-tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; color: white; font-weight: 600; }
     .cook-time { font-size: 12px; color: #9ca3af; }
-
     .empty-state { text-align: center; padding: 60px 24px; color: #9ca3af; }
     .empty-icon { font-size: 56px; margin-bottom: 14px; }
     .empty-state p { font-size: 14px; line-height: 1.6; margin-bottom: 16px; }
     .empty-btn { background: #1c1c1c; color: white; border: none; border-radius: 22px; padding: 11px 22px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1c1c1c; color: white; padding: 10px 18px; border-radius: 22px; font-size: 13px; opacity: 0; transition: opacity 0.25s; z-index: 100; }
+    .toast.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -89,20 +82,19 @@
 
   <div class="tabs">
     <button class="tab active" data-view="chat">💬 Chat</button>
-    <button class="tab" data-view="calendar">📅 Calendar</button>
+    <button class="tab" data-view="calendar">📅 Plan</button>
     <button class="tab" data-view="recipes">📖 Recipes</button>
     <button class="tab" data-view="grocery">🛒 Grocery</button>
   </div>
 
-  <!-- CHAT VIEW -->
   <div class="view active" id="chat-view">
     <div id="messages">
-      <div class="msg assistant">Hi Lily! 👋 I know all about your family. Ask me for a meal plan and I'll build it with breakfast, lunch, and dinner plus full recipes. You can view it all in the Calendar and Recipes tabs.</div>
+      <div class="msg assistant">Hi Lily! 👋 Ask me for a meal plan — I'll build it with breakfast, lunch and dinner plus recipes. Once approved you can share it with Meliza on WhatsApp or send the grocery list to Apple Reminders.</div>
     </div>
     <div class="suggestions">
-      <div class="chip" onclick="send('Generate a full weekly meal plan with breakfast, lunch, and dinner (Mon-Fri). Include breakfast options like toast, French toast, waffles, banana pancakes, or muffins. Return it as structured JSON in a code block, AND also show it in a nice readable format.')">🍽️ Full meal plan</div>
-      <div class="chip" onclick="send('Create a grocery list based on this weeks meal plan')">🛒 Grocery list</div>
-      <div class="chip" onclick="send('Quick healthy lunch ideas for Amelia')">👶 Amelia ideas</div>
+      <div class="chip" onclick="send('Generate a full weekly meal plan (Mon-Fri) with breakfast, lunch and dinner. Include recipes.')">🍽️ Full meal plan</div>
+      <div class="chip" onclick="send('Generate grocery list based on the meal plan')">🛒 Grocery list</div>
+      <div class="chip" onclick="send('Swap one of the dinners for something lighter')">🔄 Adjust plan</div>
     </div>
     <footer>
       <textarea id="input" rows="1" placeholder="Ask anything…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}"></textarea>
@@ -110,36 +102,37 @@
     </footer>
   </div>
 
-  <!-- CALENDAR VIEW -->
   <div class="view" id="calendar-view">
+    <div class="action-bar" id="calendar-actions" style="display:none">
+      <button class="action-btn primary" onclick="shareWhatsApp()">💬 Send to Meliza</button>
+      <button class="action-btn purple" onclick="publishForMeliza()">🔗 Publish</button>
+    </div>
     <div class="calendar-wrap" id="calendar-content">
       <div class="empty-state">
         <div class="empty-icon">📅</div>
-        <p>No meal plan yet.<br />Generate one from the Chat tab.</p>
+        <p>No meal plan yet.</p>
         <button class="empty-btn" onclick="switchTab('chat')">Go to Chat</button>
       </div>
     </div>
   </div>
 
-  <!-- RECIPES VIEW -->
   <div class="view" id="recipes-view">
     <div class="calendar-wrap" id="recipes-content">
-      <div class="empty-state">
-        <div class="empty-icon">📖</div>
-        <p>Recipes will appear here<br />once a meal plan is generated.</p>
-      </div>
+      <div class="empty-state"><div class="empty-icon">📖</div><p>Recipes appear here once a plan is generated.</p></div>
     </div>
   </div>
 
-  <!-- GROCERY VIEW -->
   <div class="view" id="grocery-view">
+    <div class="action-bar" id="grocery-actions" style="display:none">
+      <button class="action-btn blue" onclick="sendToReminders()">📋 Send to Reminders</button>
+      <button class="action-btn primary" onclick="shareGroceryWhatsApp()">💬 Share</button>
+    </div>
     <div class="calendar-wrap" id="grocery-content">
-      <div class="empty-state">
-        <div class="empty-icon">🛒</div>
-        <p>Generate a grocery list<br />from the Chat tab.</p>
-      </div>
+      <div class="empty-state"><div class="empty-icon">🛒</div><p>Generate a grocery list from Chat.</p></div>
     </div>
   </div>
+
+  <div class="toast" id="toast"></div>
 
   <script>
     const messages = document.getElementById('messages');
@@ -149,11 +142,17 @@
     let currentPlan = null;
     let currentGrocery = null;
 
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
     function switchTab(name) {
       document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === name));
       document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === name + '-view'));
     }
-
     document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.view)));
 
     function cuisineColor(c = '') {
@@ -173,14 +172,12 @@
         .replace(/```([\s\S]*?)```/g, '')
         .replace(/^### (.+)$/gm, '<h3>$1</h3>')
         .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
         .replace(/\*([^*]+)\*/g, '<em>$1</em>')
         .replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>')
         .replace(/^---$/gm, '<hr>')
         .replace(/(^[\-\*] .+$(\n[\-\*] .+$)*)/gm, (m) => '<ul>' + m.split('\n').map(l => '<li>' + l.replace(/^[\-\*] /, '') + '</li>').join('') + '</ul>')
         .replace(/(^\d+\. .+$(\n\d+\. .+$)*)/gm, (m) => '<ol>' + m.split('\n').map(l => '<li>' + l.replace(/^\d+\. /, '') + '</li>').join('') + '</ol>');
-      
       html = html.split('\n\n').map(b => {
         if (!b.trim()) return '';
         if (b.match(/^<(h[1-6]|ul|ol|blockquote|hr)/)) return b;
@@ -197,11 +194,11 @@
 
     function renderCalendar(plan) {
       const container = document.getElementById('calendar-content');
+      document.getElementById('calendar-actions').style.display = 'flex';
       let html = '<div class="calendar-header">';
       if (plan.theme) html += `<div class="calendar-theme">"${plan.theme}"</div>`;
       if (plan.week) html += `<div class="calendar-week">📅 ${plan.week}</div>`;
       html += '</div>';
-      
       for (const day of plan.days || []) {
         html += `<div class="day-card"><div class="day-header">${day.day}</div>`;
         for (const type of ['breakfast', 'lunch', 'dinner']) {
@@ -251,6 +248,7 @@
 
     function renderGrocery(g) {
       const container = document.getElementById('grocery-content');
+      document.getElementById('grocery-actions').style.display = 'flex';
       let html = '';
       if (g.tip) html += `<div style="background:#f0fdf4;border-radius:12px;padding:12px 15px;margin-bottom:12px;border:1px solid #bbf7d0;font-size:13px;color:#166534;line-height:1.6">💡 ${g.tip}</div>`;
       if (g.pantry_check?.length) {
@@ -267,7 +265,81 @@
         }
         html += '</div>';
       }
-      container.innerHTML = html || '<div class="empty-state"><div class="empty-icon">🛒</div><p>No grocery list yet.</p></div>';
+      container.innerHTML = html;
+    }
+
+    // ── WhatsApp: share meal plan with Meliza ──
+    function shareWhatsApp() {
+      if (!currentPlan) return;
+      let text = `🍽️ *Meal Plan — ${currentPlan.week || 'This Week'}*\n`;
+      if (currentPlan.theme) text += `_"${currentPlan.theme}"_\n`;
+      text += '\n';
+      for (const day of currentPlan.days || []) {
+        text += `*${day.day}*\n`;
+        for (const type of ['breakfast','lunch','dinner']) {
+          const meal = day[type];
+          if (!meal) continue;
+          const icon = type === 'breakfast' ? '☀️' : type === 'lunch' ? '🌤' : '🌙';
+          text += `${icon} ${type.charAt(0).toUpperCase()+type.slice(1)}: ${meal.name}`;
+          if (meal.cook_time) text += ` _(${meal.cook_time})_`;
+          text += '\n';
+        }
+        text += '\n';
+      }
+      text += `📖 Full recipes: ${window.location.origin}/meliza.html`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function shareGroceryWhatsApp() {
+      if (!currentGrocery) return;
+      let text = `🛒 *Grocery List*\n\n`;
+      if (currentGrocery.tip) text += `💡 ${currentGrocery.tip}\n\n`;
+      for (const sec of currentGrocery.sections || []) {
+        text += `*${sec.emoji || ''} ${sec.category}*\n`;
+        for (const item of sec.items) {
+          text += `• ${item.item} — ${item.quantity || item.qty || ''}${item.note ? ` (${item.note})` : ''}\n`;
+        }
+        text += '\n';
+      }
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    // ── Publish meal plan so Meliza's URL shows it ──
+    async function publishForMeliza() {
+      if (!currentPlan) return;
+      try {
+        const res = await fetch('/api/publish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan: currentPlan })
+        });
+        if (res.ok) {
+          toast('Published! Meliza can now view at /meliza.html');
+        } else {
+          toast('Failed to publish');
+        }
+      } catch {
+        toast('Publish failed');
+      }
+    }
+
+    // ── Apple Reminders: opens Shortcuts via URL scheme ──
+    function sendToReminders() {
+      if (!currentGrocery) return;
+      const items = [];
+      for (const sec of currentGrocery.sections || []) {
+        for (const item of sec.items) {
+          items.push(`${item.item} (${item.quantity || item.qty || ''})`);
+        }
+      }
+      const text = items.join('\n');
+      // Copy to clipboard + open reminders
+      navigator.clipboard.writeText(text).then(() => {
+        toast('List copied! Opening Shortcut…');
+        setTimeout(() => {
+          window.location.href = `shortcuts://run-shortcut?name=Add%20Groceries&input=text&text=${encodeURIComponent(text)}`;
+        }, 400);
+      });
     }
 
     function addUser(text) {
@@ -277,7 +349,6 @@
       messages.appendChild(d);
       messages.scrollTop = messages.scrollHeight;
     }
-
     function addAssistant(text) {
       const d = document.createElement('div');
       d.className = 'msg assistant';
@@ -285,7 +356,6 @@
       messages.appendChild(d);
       messages.scrollTop = messages.scrollHeight;
     }
-
     function addTyping() {
       const d = document.createElement('div');
       d.className = 'typing';
@@ -298,14 +368,10 @@
     async function send(text) {
       const msg = text || input.value.trim();
       if (!msg) return;
-      input.value = '';
-      input.style.height = 'auto';
-      btn.disabled = true;
-
+      input.value = ''; input.style.height = 'auto'; btn.disabled = true;
       addUser(msg);
       history.push({ role: 'user', content: msg });
       const typing = addTyping();
-
       try {
         const res = await fetch('/api/chat', {
           method: 'POST',
@@ -316,7 +382,6 @@
         typing.remove();
         addAssistant(data.reply);
         history.push({ role: 'assistant', content: data.reply });
-
         const json = extractJSON(data.reply);
         if (json) {
           if (json.days) { currentPlan = json; renderCalendar(json); renderRecipes(json); }
@@ -326,7 +391,6 @@
         typing.remove();
         addAssistant('Something went wrong.');
       }
-
       btn.disabled = false;
       input.focus();
     }
@@ -338,4 +402,3 @@
   </script>
 </body>
 </html>
-
