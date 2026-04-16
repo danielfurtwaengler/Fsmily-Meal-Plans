@@ -62,7 +62,7 @@ Always include full ingredients and step-by-step instructions for every meal —
 WHEN GENERATING A GROCERY LIST:
 Organize by category (🥩 Meat, 🥦 Vegetables, 🥚 Eggs & Tofu, 🧀 Dairy, 🛒 Pantry, 🌿 Herbs) with quantities.
 
-TONE: Warm, practical, concise. Mix Filipino, Western, and Asian cuisines. Rice regularly but not every meal. Vary proteins.`,
+TONE: Warm, practical, concise. Mix Filipino, Western, and Asian cuisines. Rice regularly but not every meal. Vary proteins.`
         messages: [{ role: 'user', content: message }]
       })
     });
