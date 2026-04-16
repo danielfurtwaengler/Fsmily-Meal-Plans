@@ -325,23 +325,22 @@
 
     // ── Apple Reminders: opens Shortcuts via URL scheme ──
     function sendToReminders() {
-      if (!currentGrocery) return;
-      const items = [];
-      for (const sec of currentGrocery.sections || []) {
-        for (const item of sec.items) {
-          items.push(`${item.item} (${item.quantity || item.qty || ''})`);
-        }
-      }
-      const text = items.join('\n');
-      // Copy to clipboard + open reminders
-      navigator.clipboard.writeText(text).then(() => {
-        toast('List copied! Opening Shortcut…');
-        setTimeout(() => {
-          window.location.href = `shortcuts://run-shortcut?name=Add%20Groceries&input=text&text=${encodeURIComponent(text)}`;
-        }, 400);
-      });
+  if (!currentGrocery) return;
+  const items = [];
+  for (const sec of currentGrocery.sections || []) {
+    for (const item of sec.items) {
+      items.push(`${item.item} (${item.quantity || item.qty || ''})`);
     }
-
+  }
+  // Pass items directly via URL with pipe separator (more reliable than newlines)
+  const text = items.join('|');
+  navigator.clipboard.writeText(items.join('\n')).then(() => {
+    toast('Opening Shortcut…');
+    setTimeout(() => {
+      window.location.href = `shortcuts://run-shortcut?name=Add%20Groceries&input=text&text=${encodeURIComponent(text)}`;
+    }, 300);
+  });
+}
     function addUser(text) {
       const d = document.createElement('div');
       d.className = 'msg user';
