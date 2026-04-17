@@ -1,3 +1,43 @@
+async function saveToNotion(plan) {
+  const weekOf = new Date().toISOString().split('T')[0];
+  const promises = [];
+  
+  for (const day of plan.days || []) {
+    for (const type of ['breakfast', 'lunch', 'dinner']) {
+      const meal = day[type];
+      if (!meal) continue;
+      
+      promises.push(fetch('https://api.notion.com/v1/pages', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
+          'Content-Type': 'application/json',
+          'Notion-Version': '2022-06-28'
+        },
+        body: JSON.stringify({
+          parent: { database_id: process.env.NOTION_DB_ID },
+          properties: {
+            'Meal Name': { title: [{ text: { content: meal.name || '' } }] },
+            'Week Of': { date: { start: weekOf } },
+            'Week Range': { rich_text: [{ text: { content: plan.week || '' } }] },
+            'Day': { select: { name: day.day } },
+            'Meal Type': { select: { name: type.charAt(0).toUpperCase() + type.slice(1) } },
+            'Cuisine': { select: { name: meal.cuisine || 'Other' } },
+            'Cook Time': { rich_text: [{ text: { content: meal.cook_time || '' } }] },
+            'Description': { rich_text: [{ text: { content: meal.description || '' } }] },
+            'Ingredients': { rich_text: [{ text: { content: (meal.ingredients || []).join('\n') } }] },
+            'Instructions': { rich_text: [{ text: { content: (meal.instructions || []).map((s, i) => `${i+1}. ${s}`).join('\n') } }] },
+            'Amelia Note': { rich_text: [{ text: { content: meal.amelia_note || '' } }] },
+            'Theme': { rich_text: [{ text: { content: plan.theme || '' } }] }
+          }
+        })
+      }));
+    }
+  }
+  
+  await Promise.allSettled(promises);
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -31,12 +71,11 @@ MEAL STRUCTURE:
 - Dinner: Whole family
 - Plan Mon-Fri only (weekends eat out)
 
-SINGAPORE context: NTUC, Cold Storage, Sheng Siong, wet market.
+SINGAPORE: NTUC, Cold Storage, Sheng Siong, wet market.
 
 WHEN GENERATING A MEAL PLAN:
-Always output structured JSON in a \`\`\`json code block, followed by a short friendly human summary.
+Output structured JSON in a \`\`\`json code block, followed by a brief friendly summary.
 
-JSON format:
 \`\`\`json
 {
   "theme": "short fun theme",
@@ -52,7 +91,7 @@ JSON format:
 }
 \`\`\`
 
-Include ALL 5 days with breakfast + lunch + dinner = 15 meals. Full ingredients and step-by-step instructions for every meal. Breakfast can be simple (toast takes 5 mins), but still give ingredients and steps.
+ALL 5 days with breakfast + lunch + dinner = 15 meals. Full ingredients and step-by-step instructions for every meal. Mix Filipino, Western, Asian. Vary proteins.
 
 WHEN GENERATING A GROCERY LIST:
 \`\`\`json
@@ -63,16 +102,28 @@ WHEN GENERATING A GROCERY LIST:
     { "category": "Meat & Poultry", "emoji": "🥩", "items": [{ "item": "Chicken thighs", "quantity": "1 kg", "note": "For adobo" }] }
   ]
 }
-\`\`\`
-
-Mix Filipino, Western, Asian. Rice regularly but not every meal. Vary proteins. Warm and concise tone.`,
+\`\`\``,
         messages: messages
       })
     });
 
     const data = await response.json();
     if (data.error) return res.status(500).json({ reply: 'API error: ' + data.error.message });
+    
     const text = data.content?.[0]?.text || 'No response received.';
+    
+    // Try to extract a meal plan and save to Notion
+    const match = text.match(/```json\s*([\s\S]*?)\s*```/);
+    if (match) {
+      try {
+        const parsed = JSON.parse(match[1]);
+        if (parsed.days) {
+          // Don't await — fire and forget so user gets fast response
+          saveToNotion(parsed).catch(e => console.error('Notion save failed:', e));
+        }
+      } catch {}
+    }
+    
     return res.status(200).json({ reply: text });
 
   } catch (err) {
