@@ -119,7 +119,9 @@ WHEN GENERATING A GROCERY LIST:
         const parsed = JSON.parse(match[1]);
         if (parsed.days) {
           // Don't await — fire and forget so user gets fast response
-          saveToNotion(parsed).catch(e => console.error('Notion save failed:', e));
+          saveToNotion(parsed)
+  .then(() => console.log('NOTION SUCCESS'))
+  .catch(e => console.error('NOTION FAILED:', e.message, e.stack));
         }
       } catch {}
     }
