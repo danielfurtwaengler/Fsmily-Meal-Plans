@@ -168,8 +168,7 @@
     function md(text) {
       let html = text
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/```json([\s\S]*?)```/g, '')
-        .replace(/```([\s\S]*?)```/g, '')
+.replace(/```[\s\S]*?```/g, '')
         .replace(/^### (.+)$/gm, '<h3>$1</h3>')
         .replace(/^## (.+)$/gm, '<h2>$1</h2>')
         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
