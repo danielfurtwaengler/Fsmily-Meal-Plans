@@ -35,7 +35,9 @@ async function saveToNotion(plan) {
     }
   }
   
-  await Promise.allSettled(promises);
+  const results = await Promise.allSettled(promises);
+  const failed = results.filter(r => r.status === 'rejected');
+  console.log(`Notion: ${results.length - failed.length}/${results.length} saved`);
 }
 
 export default async function handler(req, res) {
@@ -62,7 +64,7 @@ export default async function handler(req, res) {
 FAMILY:
 - Amelia (21mo toddler): Soft foods, low salt/sugar, no honey/nuts. Needs iron, calcium, vitamins.
 - Lily (Filipino mom): No restrictions. Rice is a staple.
-- Daniel (German dad): No seafood (occasional fish ok). No mustard/ketchup/pickles. Bread + cold cuts 1-2x/week.
+- Daniel (German dad): NO seafood at all (occasional fresh fish ok, but never default to it). NO mustard, NO ketchup, NO pickles. Bread + cold cuts 1-2x/week.
 - Meliza (Filipino helper): Does the cooking. Needs rice. Fine with anything.
 
 MEAL STRUCTURE:
@@ -74,8 +76,17 @@ MEAL STRUCTURE:
 SINGAPORE: NTUC, Cold Storage, Sheng Siong, wet market.
 
 WHEN GENERATING A MEAL PLAN:
-Output structured JSON in a \`\`\`json code block, followed by a brief friendly summary.
 
+ALWAYS start with a brief 2-3 sentence friendly summary mentioning the theme and a couple of highlights. THEN add the structured JSON in a code block. The summary text BEFORE the JSON is REQUIRED — never skip it.
+
+Example response format:
+"Here's your week ahead — leaning into Filipino comfort food with a few Western touches. Highlight is Thursday's Beef Kare-Kare. 🍛
+
+\`\`\`json
+{ ... }
+\`\`\`"
+
+JSON structure:
 \`\`\`json
 {
   "theme": "short fun theme",
@@ -91,9 +102,10 @@ Output structured JSON in a \`\`\`json code block, followed by a brief friendly 
 }
 \`\`\`
 
-ALL 5 days with breakfast + lunch + dinner = 15 meals. Full ingredients and step-by-step instructions for every meal. Mix Filipino, Western, Asian. Vary proteins.
+ALL 5 days with breakfast + lunch + dinner = 15 meals. Full ingredients and step-by-step instructions for every meal. Mix Filipino, Western, Asian. Vary proteins. AVOID seafood unless specifically asked.
 
 WHEN GENERATING A GROCERY LIST:
+Brief 1-sentence intro, then JSON:
 \`\`\`json
 {
   "tip": "shopping tip",
@@ -118,20 +130,13 @@ WHEN GENERATING A GROCERY LIST:
       try {
         const parsed = JSON.parse(match[1]);
         if (parsed.days) {
-          // Don't await — fire and forget so user gets fast response
           saveToNotion(parsed)
- const results = await Promise.allSettled(promises);
-const failed = results.filter(r => r.status === 'rejected');
-const succeeded = results.filter(r => r.status === 'fulfilled');
-console.log(`Notion save: ${succeeded.length} succeeded, ${failed.length} failed`);
-
-// Check actual response from a successful one
-if (succeeded.length > 0) {
-  const sample = await succeeded[0].value.json();
-  console.log('Notion response sample:', JSON.stringify(sample).slice(0, 500));
-}
+            .then(() => console.log('NOTION SUCCESS'))
+            .catch(e => console.error('NOTION FAILED:', e.message));
         }
-      } catch {}
+      } catch (e) {
+        console.error('JSON parse failed:', e.message);
+      }
     }
     
     return res.status(200).json({ reply: text });
