@@ -164,27 +164,37 @@
       if (/Italian/i.test(c)) return '#16a34a';
       return '#6d28d9';
     }
-
     function md(text) {
-      let html = text
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-.replace(/```[\s\S]*?```/g, '')
-        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-        .replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>')
-        .replace(/^---$/gm, '<hr>')
-        .replace(/(^[\-\*] .+$(\n[\-\*] .+$)*)/gm, (m) => '<ul>' + m.split('\n').map(l => '<li>' + l.replace(/^[\-\*] /, '') + '</li>').join('') + '</ul>')
-        .replace(/(^\d+\. .+$(\n\d+\. .+$)*)/gm, (m) => '<ol>' + m.split('\n').map(l => '<li>' + l.replace(/^\d+\. /, '') + '</li>').join('') + '</ol>');
-      html = html.split('\n\n').map(b => {
-        if (!b.trim()) return '';
-        if (b.match(/^<(h[1-6]|ul|ol|blockquote|hr)/)) return b;
-        return '<p>' + b.replace(/\n/g, '<br>') + '</p>';
-      }).join('');
-      return html;
+  // First strip all code blocks before any other processing
+  let cleaned = '';
+  let inCodeBlock = false;
+  const lines = text.split('\n');
+  for (const line of lines) {
+    if (line.trim().startsWith('```')) {
+      inCodeBlock = !inCodeBlock;
+      continue;
     }
-
+    if (!inCodeBlock) cleaned += line + '\n';
+  }
+  
+  let html = cleaned
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>')
+    .replace(/^---$/gm, '<hr>')
+    .replace(/(^[\-\*] .+$(\n[\-\*] .+$)*)/gm, (m) => '<ul>' + m.split('\n').map(l => '<li>' + l.replace(/^[\-\*] /, '') + '</li>').join('') + '</ul>')
+    .replace(/(^\d+\. .+$(\n\d+\. .+$)*)/gm, (m) => '<ol>' + m.split('\n').map(l => '<li>' + l.replace(/^\d+\. /, '') + '</li>').join('') + '</ol>');
+  
+  html = html.split('\n\n').map(b => {
+    if (!b.trim()) return '';
+    if (b.match(/^<(h[1-6]|ul|ol|blockquote|hr)/)) return b;
+    return '<p>' + b.replace(/\n/g, '<br>') + '</p>';
+  }).join('');
+  return html;
+}
     function extractJSON(text) {
       const match = text.match(/```json\s*([\s\S]*?)\s*```/);
       if (!match) return null;
