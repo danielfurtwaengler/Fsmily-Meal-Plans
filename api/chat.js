@@ -1,5 +1,5 @@
 async function saveToNotion(plan) {
-  const weekOf = new Date().toISOString().split('T')[0];
+  const weekOf = plan.weekOfDate || new Date().toISOString().split('T')[0];
   const promises = [];
   
   for (const day of plan.days || []) {
@@ -47,20 +47,27 @@ export default async function handler(req, res) {
 
   try {
     const { message, history = [] } = req.body;
+    
+    // Calculate next week's Monday-Friday
     const today = new Date();
-const monday = new Date(today);
-monday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
-const friday = new Date(monday);
-friday.setDate(monday.getDate() + 4);
-const fmt = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-const weekRange = `Mon ${fmt(monday)} – Fri ${fmt(friday)}`;
+    const dayOfWeek = today.getDay();
+    const daysUntilNextMonday = (8 - dayOfWeek) % 7 || 7;
+    const nextMonday = new Date(today);
+    nextMonday.setDate(today.getDate() + daysUntilNextMonday);
+    const nextFriday = new Date(nextMonday);
+    nextFriday.setDate(nextMonday.getDate() + 4);
+    
+    const fmt = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const weekRange = `Mon ${fmt(nextMonday)} – Fri ${fmt(nextFriday)}`;
+    const weekOfDate = nextMonday.toISOString().split('T')[0];
+    
+    const dateContext = `Today is ${today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}. Plan for the UPCOMING week: ${weekRange} (weekOfDate: ${weekOfDate}).`;
+    
+    const messages = [
+      ...history.slice(-10),
+      { role: 'user', content: dateContext + '\n\n' + message }
+    ];
 
-const dateContext = `Today is ${today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}. The current week is ${weekRange}.`;
-
-const messages = [
-  ...history.slice(-10),
-  { role: 'user', content: dateContext + '\n\n' + message }
-];
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -84,6 +91,7 @@ MEAL STRUCTURE:
 - Lunch: Amelia + Meliza (Daniel joins sometimes)
 - Dinner: Whole family
 - Plan Mon-Fri only (weekends eat out)
+- ALWAYS plan for the UPCOMING week (next Monday onwards), never the current week
 
 SINGAPORE: NTUC, Cold Storage, Sheng Siong, wet market.
 
@@ -98,11 +106,12 @@ Example response format:
 { ... }
 \`\`\`"
 
-JSON structure:
+JSON structure (use the exact week and weekOfDate from the user's date context):
 \`\`\`json
 {
   "theme": "short fun theme",
   "week": "Mon 21 Apr – Fri 25 Apr",
+  "weekOfDate": "2026-04-21",
   "days": [
     {
       "day": "Monday",
@@ -143,11 +152,11 @@ Brief 1-sentence intro, then JSON:
         const parsed = JSON.parse(match[1]);
         if (parsed.days) {
           try {
-  await saveToNotion(parsed);
-  console.log('NOTION SUCCESS');
-} catch (e) {
-  console.error('NOTION FAILED:', e.message);
-}
+            await saveToNotion(parsed);
+            console.log('NOTION SUCCESS');
+          } catch (e) {
+            console.error('NOTION FAILED:', e.message);
+          }
         }
       } catch (e) {
         console.error('JSON parse failed:', e.message);
@@ -160,3 +169,4 @@ Brief 1-sentence intro, then JSON:
     return res.status(500).json({ reply: 'Error: ' + err.message });
   }
 }
+
