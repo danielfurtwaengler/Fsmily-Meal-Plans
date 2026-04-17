@@ -4,40 +4,67 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Kitchen" />
+  <meta name="theme-color" content="#1c1c1c" />
   <title>Kitchen 🍳</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, system-ui, sans-serif; background: #faf7f2; color: #1c1c1c; min-height: 100vh; padding-bottom: 40px; }
-    header { background: #1c1c1c; color: white; padding: 20px; padding-top: max(20px, env(safe-area-inset-top)); text-align: center; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; }
+    body { font-family: -apple-system, system-ui, sans-serif; background: #faf7f2; color: #1c1c1c; display: flex; flex-direction: column; }
+    
+    header { background: #1c1c1c; color: white; padding: 18px 20px 14px; padding-top: max(18px, env(safe-area-inset-top)); text-align: center; }
     header h1 { font-size: 20px; font-weight: 700; }
-    header p { font-size: 12px; color: #9ca3af; margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; }
+    header p { font-size: 11px; color: #9ca3af; margin-top: 4px; letter-spacing: 2px; text-transform: uppercase; }
+    
     .tabs { display: flex; background: #1c1c1c; padding: 0 12px; gap: 4px; }
-    .tab { flex: 1; padding: 10px; background: transparent; border: none; color: #9ca3af; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; border-bottom: 2px solid transparent; }
-    .tab.active { color: white; border-bottom-color: #a78bfa; }
-    .view { display: none; padding: 16px; max-width: 680px; margin: 0 auto; }
+    .tab { flex: 1; padding: 12px; background: transparent; border: none; color: #9ca3af; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; border-bottom: 2px solid transparent; }
+    .tab.active { color: white; border-bottom-color: #fbbf24; }
+    
+    .view { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; padding: 16px; }
     .view.active { display: block; }
-    .theme { background: #1c1c1c; color: white; border-radius: 14px; padding: 14px 18px; margin-bottom: 12px; }
-    .theme-text { font-size: 15px; font-style: italic; color: #a78bfa; }
+    
+    .theme-card { background: #1c1c1c; color: white; border-radius: 14px; padding: 14px 18px; margin-bottom: 12px; }
+    .theme-text { font-size: 15px; font-style: italic; color: #fbbf24; }
     .theme-week { font-size: 12px; color: #9ca3af; margin-top: 3px; }
-    .day-card { background: white; border-radius: 14px; margin-bottom: 10px; overflow: hidden; border: 1px solid #f0ebe3; }
-    .day-header { padding: 11px 15px; border-bottom: 1px solid #f0ebe3; font-size: 15px; font-weight: 700; background: #faf7f2; }
-    .meal-row { padding: 11px 15px; border-bottom: 1px solid #f9f6f2; }
+    
+    .day-card { background: white; border-radius: 14px; margin-bottom: 10px; overflow: hidden; border: 1px solid #f0ebe3; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    .day-header { padding: 12px 16px; border-bottom: 1px solid #f0ebe3; font-size: 16px; font-weight: 700; background: #faf7f2; }
+    
+    .meal-row { padding: 12px 16px; border-bottom: 1px solid #f9f6f2; cursor: pointer; transition: background 0.15s; }
     .meal-row:last-child { border-bottom: none; }
-    .meal-type { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #9ca3af; margin-bottom: 3px; }
-    .meal-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-    .meta { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+    .meal-row:active { background: #faf7f2; }
+    .meal-type { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #9ca3af; margin-bottom: 4px; }
+    .meal-name { font-size: 16px; font-weight: 600; margin-bottom: 5px; }
+    .meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; color: white; font-weight: 600; }
-    .time { font-size: 12px; color: #9ca3af; }
-    .empty { text-align: center; padding: 60px 24px; color: #9ca3af; }
-    .empty-icon { font-size: 56px; margin-bottom: 14px; }
-    .recipe-box { padding: 14px 16px; }
-    .recipe-name { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-    .recipe-desc { font-size: 13px; color: #4b5563; line-height: 1.6; margin-bottom: 10px; }
-    .section-label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #9ca3af; font-weight: 600; margin-bottom: 6px; }
-    .recipe-box ul, .recipe-box ol { margin: 0 0 12px 20px; font-size: 13px; line-height: 1.7; }
-    .amelia { background: #fef3c7; border-left: 3px solid #f59e0b; padding: 8px 10px; border-radius: 0 6px 6px 0; font-size: 12px; color: #92400e; line-height: 1.5; }
-    .amelia strong { display: block; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+    .time { font-size: 12px; color: #6b7280; font-weight: 500; }
+    .arrow { font-size: 14px; color: #d1d5db; margin-left: auto; }
+    
+    .recipe-card { background: white; border-radius: 14px; margin-bottom: 12px; overflow: hidden; border: 1px solid #f0ebe3; }
+    .recipe-head { padding: 14px 16px; border-bottom: 1px solid #f0ebe3; background: #faf7f2; font-size: 14px; font-weight: 700; }
+    .recipe-body { padding: 16px; }
+    .recipe-name { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .recipe-desc { font-size: 14px; color: #4b5563; line-height: 1.6; margin-bottom: 14px; }
+    .section-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #9ca3af; font-weight: 700; margin: 16px 0 8px; }
+    .section-label:first-child { margin-top: 0; }
+    .recipe-body ul, .recipe-body ol { margin: 0 0 4px 22px; font-size: 15px; line-height: 1.8; color: #1c1c1c; }
+    .recipe-body li { margin-bottom: 4px; }
+    .amelia-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 14px; border-radius: 0 8px 8px 0; font-size: 13px; color: #92400e; line-height: 1.6; margin-top: 14px; }
+    .amelia-box strong { display: block; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+    
+    .empty { text-align: center; padding: 80px 24px; color: #9ca3af; }
+    .empty-icon { font-size: 64px; margin-bottom: 16px; }
+    .empty p { font-size: 15px; line-height: 1.6; }
+    
+    .loader { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
+    
+    .filter-pills { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
+    .filter-pills::-webkit-scrollbar { display: none; }
+    .filter-pill { background: white; border: 1.5px solid #e5e7eb; border-radius: 20px; padding: 6px 14px; font-size: 13px; white-space: nowrap; color: #6b7280; cursor: pointer; flex-shrink: 0; font-weight: 500; }
+    .filter-pill.active { background: #1c1c1c; color: white; border-color: #1c1c1c; }
+    
+    .refresh-btn { background: white; border: 1.5px solid #e5e7eb; border-radius: 20px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: #6b7280; cursor: pointer; font-family: inherit; }
   </style>
 </head>
 <body>
@@ -45,19 +72,29 @@
     <h1>Kitchen 🍳</h1>
     <p>This week's meals & recipes</p>
   </header>
+  
   <div class="tabs">
-    <button class="tab active" data-view="plan">📅 Plan</button>
+    <button class="tab active" data-view="plan">📅 Today & Week</button>
     <button class="tab" data-view="recipes">📖 Recipes</button>
   </div>
-  <div class="view active" id="plan-view"><div class="empty"><div class="empty-icon">📅</div><p>Loading…</p></div></div>
-  <div class="view" id="recipes-view"><div class="empty"><div class="empty-icon">📖</div><p>Loading…</p></div></div>
+  
+  <div class="view active" id="plan-view">
+    <div class="loader">Loading…</div>
+  </div>
+  
+  <div class="view" id="recipes-view">
+    <div class="loader">Loading…</div>
+  </div>
 
   <script>
+    let currentPlan = null;
+    let recipeFilter = 'all';
+    
     document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.view === t.dataset.view));
       document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === t.dataset.view + '-view'));
     }));
-
+    
     function cuisineColor(c = '') {
       if (/Filipino|Pinoy/i.test(c)) return '#c2410c';
       if (/German|Western|European/i.test(c)) return '#1d4ed8';
@@ -67,46 +104,125 @@
       if (/Italian/i.test(c)) return '#16a34a';
       return '#6d28d9';
     }
-
-    fetch('/api/plan').then(r => r.json()).then(plan => {
-      if (!plan || !plan.days) return;
-      // Plan view
-      let html = '<div class="theme">';
+    
+    function todayName() {
+      return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date().getDay()];
+    }
+    
+    function renderPlan(plan) {
+      const container = document.getElementById('plan-view');
+      const today = todayName();
+      
+      let html = '<div class="theme-card">';
       if (plan.theme) html += `<div class="theme-text">"${plan.theme}"</div>`;
       if (plan.week) html += `<div class="theme-week">📅 ${plan.week}</div>`;
       html += '</div>';
-      for (const day of plan.days) {
-        html += `<div class="day-card"><div class="day-header">${day.day}</div>`;
-        for (const type of ['breakfast','lunch','dinner']) {
+      
+      // Reorder: today first, then rest
+      const days = [...plan.days];
+      const todayIdx = days.findIndex(d => d.day === today);
+      const ordered = todayIdx >= 0 ? [days[todayIdx], ...days.filter((_, i) => i !== todayIdx)] : days;
+      
+      for (const day of ordered) {
+        const isToday = day.day === today;
+        html += `<div class="day-card">
+          <div class="day-header">${isToday ? '👉 ' : ''}${day.day}${isToday ? ' (Today)' : ''}</div>`;
+        for (const type of ['breakfast', 'lunch', 'dinner']) {
           const m = day[type]; if (!m) continue;
           const icon = type === 'breakfast' ? '☀️' : type === 'lunch' ? '🌤' : '🌙';
-          html += `<div class="meal-row"><div class="meal-type">${icon} ${type}</div><div class="meal-name">${m.name}</div><div class="meta">${m.cuisine?`<span class="tag" style="background:${cuisineColor(m.cuisine)}">${m.cuisine}</span>`:''}${m.cook_time?`<span class="time">⏱ ${m.cook_time}</span>`:''}</div></div>`;
+          html += `<div class="meal-row" onclick="goToRecipe('${day.day}', '${type}')">
+            <div class="meal-type">${icon} ${type}</div>
+            <div class="meal-name">${m.name}</div>
+            <div class="meta">
+              ${m.cuisine ? `<span class="tag" style="background:${cuisineColor(m.cuisine)}">${m.cuisine}</span>` : ''}
+              ${m.cook_time ? `<span class="time">⏱ ${m.cook_time}</span>` : ''}
+              <span class="arrow">→</span>
+            </div>
+          </div>`;
         }
         html += '</div>';
       }
-      document.getElementById('plan-view').innerHTML = html;
-
-      // Recipes view
-      let r = '';
+      container.innerHTML = html;
+    }
+    
+    function renderRecipes(plan) {
+      const container = document.getElementById('recipes-view');
+      const today = todayName();
+      
+      let html = '<div class="filter-pills">';
+      const filters = [['all', 'All days'], ['today', '👉 Today'], ['breakfast', '☀️ Breakfast'], ['lunch', '🌤 Lunch'], ['dinner', '🌙 Dinner']];
+      for (const [id, label] of filters) {
+        html += `<div class="filter-pill ${recipeFilter === id ? 'active' : ''}" onclick="setFilter('${id}')">${label}</div>`;
+      }
+      html += '</div>';
+      
+      let count = 0;
       for (const day of plan.days) {
-        for (const type of ['breakfast','lunch','dinner']) {
+        for (const type of ['breakfast', 'lunch', 'dinner']) {
           const m = day[type]; if (!m) continue;
+          
+          // Apply filter
+          if (recipeFilter === 'today' && day.day !== today) continue;
+          if (['breakfast','lunch','dinner'].includes(recipeFilter) && type !== recipeFilter) continue;
+          
+          count++;
           const icon = type === 'breakfast' ? '☀️' : type === 'lunch' ? '🌤' : '🌙';
-          r += `<div class="day-card"><div class="day-header">${icon} ${day.day} · ${type}</div><div class="recipe-box">
-            <div class="recipe-name">${m.name}</div>
-            <div class="meta" style="margin-bottom:10px">${m.cuisine?`<span class="tag" style="background:${cuisineColor(m.cuisine)}">${m.cuisine}</span>`:''}${m.cook_time?`<span class="time">⏱ ${m.cook_time}</span>`:''}</div>
-            ${m.description?`<div class="recipe-desc">${m.description}</div>`:''}
-            ${m.ingredients?`<div class="section-label">Ingredients</div><ul>${m.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
-            ${m.instructions?`<div class="section-label">Instructions</div><ol>${m.instructions.map(s=>`<li>${s}</li>`).join('')}</ol>`:''}
-            ${m.amelia_note?`<div class="amelia"><strong>👶 Amelia's version</strong>${m.amelia_note}</div>`:''}
-          </div></div>`;
+          html += `<div class="recipe-card" id="recipe-${day.day}-${type}">
+            <div class="recipe-head">${icon} ${day.day} · ${type.charAt(0).toUpperCase()+type.slice(1)}</div>
+            <div class="recipe-body">
+              <div class="recipe-name">${m.name}</div>
+              <div class="meta" style="margin-bottom:14px">
+                ${m.cuisine ? `<span class="tag" style="background:${cuisineColor(m.cuisine)}">${m.cuisine}</span>` : ''}
+                ${m.cook_time ? `<span class="time">⏱ ${m.cook_time}</span>` : ''}
+              </div>
+              ${m.description ? `<div class="recipe-desc">${m.description}</div>` : ''}
+              ${m.ingredients?.length ? `<div class="section-label">🥘 Ingredients</div><ul>${m.ingredients.map(i => `<li>${i}</li>`).join('')}</ul>` : ''}
+              ${m.instructions?.length ? `<div class="section-label">📝 Instructions</div><ol>${m.instructions.map(s => `<li>${s}</li>`).join('')}</ol>` : ''}
+              ${m.amelia_note ? `<div class="amelia-box"><strong>👶 Amelia's version</strong>${m.amelia_note}</div>` : ''}
+            </div>
+          </div>`;
         }
       }
-      document.getElementById('recipes-view').innerHTML = r || '<div class="empty"><p>No recipes yet.</p></div>';
-    }).catch(() => {
-      document.getElementById('plan-view').innerHTML = '<div class="empty"><div class="empty-icon">📅</div><p>No meal plan published yet.</p></div>';
-      document.getElementById('recipes-view').innerHTML = '<div class="empty"><div class="empty-icon">📖</div><p>No recipes yet.</p></div>';
+      
+      if (count === 0) {
+        html += '<div class="empty"><div class="empty-icon">🤷</div><p>No meals match this filter.</p></div>';
+      }
+      
+      container.innerHTML = html;
+    }
+    
+    function setFilter(f) {
+      recipeFilter = f;
+      renderRecipes(currentPlan);
+    }
+    
+    function goToRecipe(day, type) {
+      // Switch to recipes tab
+      document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.view === 'recipes'));
+      document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'recipes-view'));
+      // Reset filter to all so the recipe is visible
+      recipeFilter = 'all';
+      renderRecipes(currentPlan);
+      // Scroll to the specific recipe
+      setTimeout(() => {
+        const el = document.getElementById(`recipe-${day}-${type}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+    
+    fetch('/api/plan').then(r => r.json()).then(plan => {
+      if (!plan || !plan.days || plan.days.length === 0) {
+        document.getElementById('plan-view').innerHTML = '<div class="empty"><div class="empty-icon">📅</div><p>No meal plan yet.<br>Lily will publish one soon!</p></div>';
+        document.getElementById('recipes-view').innerHTML = '<div class="empty"><div class="empty-icon">📖</div><p>No recipes yet.</p></div>';
+        return;
+      }
+      currentPlan = plan;
+      renderPlan(plan);
+      renderRecipes(plan);
+    }).catch(e => {
+      document.getElementById('plan-view').innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><p>Couldn't load meals.<br><small>${e.message}</small></p></div>`;
     });
   </script>
 </body>
 </html>
+
