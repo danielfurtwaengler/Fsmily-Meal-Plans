@@ -105,8 +105,34 @@
       return '#6d28d9';
     }
     
-    function todayName() {
-      return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date().getDay()];
+    function getTodayInWeek(plan) {
+  // Returns the day name only if today falls within this plan's week
+  if (!plan.week) return null;
+  
+  const today = new Date();
+  const todayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][today.getDay()];
+  
+  // Parse week range like "Mon 20 Apr – Fri 24 Apr"
+  const match = plan.week.match(/(\d+)\s+(\w+)/);
+  if (!match) return null;
+  
+  const planStartDay = parseInt(match[1]);
+  const planMonth = match[2];
+  const months = { Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5, Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11 };
+  
+  // Try current year and next year (handle Dec→Jan rollover)
+  for (const year of [today.getFullYear(), today.getFullYear() + 1]) {
+    const planMonday = new Date(year, months[planMonth], planStartDay);
+    const planFriday = new Date(planMonday);
+    planFriday.setDate(planMonday.getDate() + 4);
+    
+    if (today >= planMonday && today <= planFriday) {
+      return todayName;
+    }
+  }
+  
+  return null; // Today is not in this plan's week
+}
     }
     
     function renderPlan(plan) {
