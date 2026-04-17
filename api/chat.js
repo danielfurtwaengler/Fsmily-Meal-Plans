@@ -120,8 +120,16 @@ WHEN GENERATING A GROCERY LIST:
         if (parsed.days) {
           // Don't await — fire and forget so user gets fast response
           saveToNotion(parsed)
-  .then(() => console.log('NOTION SUCCESS'))
-  .catch(e => console.error('NOTION FAILED:', e.message, e.stack));
+ const results = await Promise.allSettled(promises);
+const failed = results.filter(r => r.status === 'rejected');
+const succeeded = results.filter(r => r.status === 'fulfilled');
+console.log(`Notion save: ${succeeded.length} succeeded, ${failed.length} failed`);
+
+// Check actual response from a successful one
+if (succeeded.length > 0) {
+  const sample = await succeeded[0].value.json();
+  console.log('Notion response sample:', JSON.stringify(sample).slice(0, 500));
+}
         }
       } catch {}
     }
