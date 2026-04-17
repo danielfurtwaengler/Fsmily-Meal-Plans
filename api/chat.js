@@ -130,9 +130,12 @@ Brief 1-sentence intro, then JSON:
       try {
         const parsed = JSON.parse(match[1]);
         if (parsed.days) {
-          saveToNotion(parsed)
-            .then(() => console.log('NOTION SUCCESS'))
-            .catch(e => console.error('NOTION FAILED:', e.message));
+          try {
+  await saveToNotion(parsed);
+  console.log('NOTION SUCCESS');
+} catch (e) {
+  console.error('NOTION FAILED:', e.message);
+}
         }
       } catch (e) {
         console.error('JSON parse failed:', e.message);
