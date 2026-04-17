@@ -12,35 +12,27 @@
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; overflow: hidden; }
     body { font-family: -apple-system, system-ui, sans-serif; background: #faf7f2; color: #1c1c1c; display: flex; flex-direction: column; }
-    
     header { background: #1c1c1c; color: white; padding: 18px 20px 14px; padding-top: max(18px, env(safe-area-inset-top)); text-align: center; }
     header h1 { font-size: 20px; font-weight: 700; }
     header p { font-size: 11px; color: #9ca3af; margin-top: 4px; letter-spacing: 2px; text-transform: uppercase; }
-    
     .tabs { display: flex; background: #1c1c1c; padding: 0 12px; gap: 4px; }
     .tab { flex: 1; padding: 12px; background: transparent; border: none; color: #9ca3af; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; border-bottom: 2px solid transparent; }
     .tab.active { color: white; border-bottom-color: #fbbf24; }
-    
     .view { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; padding: 16px; }
     .view.active { display: block; }
-    
     .theme-card { background: #1c1c1c; color: white; border-radius: 14px; padding: 14px 18px; margin-bottom: 12px; }
     .theme-text { font-size: 15px; font-style: italic; color: #fbbf24; }
     .theme-week { font-size: 12px; color: #9ca3af; margin-top: 3px; }
-    
-    .day-card { background: white; border-radius: 14px; margin-bottom: 10px; overflow: hidden; border: 1px solid #f0ebe3; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    .day-card { background: white; border-radius: 14px; margin-bottom: 10px; overflow: hidden; border: 1px solid #f0ebe3; }
     .day-header { padding: 12px 16px; border-bottom: 1px solid #f0ebe3; font-size: 16px; font-weight: 700; background: #faf7f2; }
-    
-    .meal-row { padding: 12px 16px; border-bottom: 1px solid #f9f6f2; cursor: pointer; transition: background 0.15s; }
+    .meal-row { padding: 12px 16px; border-bottom: 1px solid #f9f6f2; cursor: pointer; }
     .meal-row:last-child { border-bottom: none; }
-    .meal-row:active { background: #faf7f2; }
     .meal-type { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #9ca3af; margin-bottom: 4px; }
     .meal-name { font-size: 16px; font-weight: 600; margin-bottom: 5px; }
     .meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; color: white; font-weight: 600; }
     .time { font-size: 12px; color: #6b7280; font-weight: 500; }
     .arrow { font-size: 14px; color: #d1d5db; margin-left: auto; }
-    
     .recipe-card { background: white; border-radius: 14px; margin-bottom: 12px; overflow: hidden; border: 1px solid #f0ebe3; }
     .recipe-head { padding: 14px 16px; border-bottom: 1px solid #f0ebe3; background: #faf7f2; font-size: 14px; font-weight: 700; }
     .recipe-body { padding: 16px; }
@@ -48,23 +40,18 @@
     .recipe-desc { font-size: 14px; color: #4b5563; line-height: 1.6; margin-bottom: 14px; }
     .section-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #9ca3af; font-weight: 700; margin: 16px 0 8px; }
     .section-label:first-child { margin-top: 0; }
-    .recipe-body ul, .recipe-body ol { margin: 0 0 4px 22px; font-size: 15px; line-height: 1.8; color: #1c1c1c; }
+    .recipe-body ul, .recipe-body ol { margin: 0 0 4px 22px; font-size: 15px; line-height: 1.8; }
     .recipe-body li { margin-bottom: 4px; }
     .amelia-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 14px; border-radius: 0 8px 8px 0; font-size: 13px; color: #92400e; line-height: 1.6; margin-top: 14px; }
     .amelia-box strong { display: block; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
-    
     .empty { text-align: center; padding: 80px 24px; color: #9ca3af; }
     .empty-icon { font-size: 64px; margin-bottom: 16px; }
     .empty p { font-size: 15px; line-height: 1.6; }
-    
     .loader { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
-    
     .filter-pills { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
     .filter-pills::-webkit-scrollbar { display: none; }
     .filter-pill { background: white; border: 1.5px solid #e5e7eb; border-radius: 20px; padding: 6px 14px; font-size: 13px; white-space: nowrap; color: #6b7280; cursor: pointer; flex-shrink: 0; font-weight: 500; }
     .filter-pill.active { background: #1c1c1c; color: white; border-color: #1c1c1c; }
-    
-    .refresh-btn { background: white; border: 1.5px solid #e5e7eb; border-radius: 20px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: #6b7280; cursor: pointer; font-family: inherit; }
   </style>
 </head>
 <body>
@@ -72,173 +59,143 @@
     <h1>Kitchen 🍳</h1>
     <p>This week's meals & recipes</p>
   </header>
-  
   <div class="tabs">
-    <button class="tab active" data-view="plan">📅 Today & Week</button>
+    <button class="tab active" data-view="plan">📅 Plan</button>
     <button class="tab" data-view="recipes">📖 Recipes</button>
   </div>
-  
-  <div class="view active" id="plan-view">
-    <div class="loader">Loading…</div>
-  </div>
-  
-  <div class="view" id="recipes-view">
-    <div class="loader">Loading…</div>
-  </div>
+  <div class="view active" id="plan-view"><div class="loader">Loading…</div></div>
+  <div class="view" id="recipes-view"><div class="loader">Loading…</div></div>
 
   <script>
     let currentPlan = null;
     let recipeFilter = 'all';
-    
+
     document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.view === t.dataset.view));
       document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === t.dataset.view + '-view'));
     }));
-    
-    function cuisineColor(c = '') {
-      if (/Filipino|Pinoy/i.test(c)) return '#c2410c';
-      if (/German|Western|European/i.test(c)) return '#1d4ed8';
-      if (/Japanese/i.test(c)) return '#be123c';
-      if (/Thai|Vietnamese/i.test(c)) return '#15803d';
-      if (/Chinese/i.test(c)) return '#b91c1c';
-      if (/Italian/i.test(c)) return '#16a34a';
+
+    function cuisineColor(c) {
+      c = c || '';
+      if (c.indexOf('Filipino') >= 0 || c.indexOf('Pinoy') >= 0) return '#c2410c';
+      if (c.indexOf('German') >= 0 || c.indexOf('Western') >= 0 || c.indexOf('European') >= 0) return '#1d4ed8';
+      if (c.indexOf('Japanese') >= 0) return '#be123c';
+      if (c.indexOf('Thai') >= 0 || c.indexOf('Vietnamese') >= 0) return '#15803d';
+      if (c.indexOf('Chinese') >= 0) return '#b91c1c';
+      if (c.indexOf('Italian') >= 0) return '#16a34a';
       return '#6d28d9';
     }
-    
+
+    // Determine if today falls within the displayed week
     function getTodayInWeek(plan) {
-  // Returns the day name only if today falls within this plan's week
-  if (!plan.week) return null;
-  
-  const today = new Date();
-  const todayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][today.getDay()];
-  
-  // Parse week range like "Mon 20 Apr – Fri 24 Apr"
-  const match = plan.week.match(/(\d+)\s+(\w+)/);
-  if (!match) return null;
-  
-  const planStartDay = parseInt(match[1]);
-  const planMonth = match[2];
-  const months = { Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5, Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11 };
-  
-  // Try current year and next year (handle Dec→Jan rollover)
-  for (const year of [today.getFullYear(), today.getFullYear() + 1]) {
-    const planMonday = new Date(year, months[planMonth], planStartDay);
-    const planFriday = new Date(planMonday);
-    planFriday.setDate(planMonday.getDate() + 4);
-    
-    if (today >= planMonday && today <= planFriday) {
-      return todayName;
+      try {
+        if (!plan || !plan.week) return null;
+        const today = new Date();
+        const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const todayName = dayNames[today.getDay()];
+        // Match "Mon 20 Apr" pattern
+        const m = plan.week.match(/(\d{1,2})\s+(\w{3})/);
+        if (!m) return null;
+        const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+        const startDay = parseInt(m[1]);
+        const monthIdx = months[m[2]];
+        if (monthIdx === undefined) return null;
+        // Try current year
+        const startDate = new Date(today.getFullYear(), monthIdx, startDay);
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 4);
+        if (today >= startDate && today <= endDate) return todayName;
+        return null;
+      } catch (e) {
+        return null;
+      }
     }
-  }
-  
-  return null; // Today is not in this plan's week
-}
-    }
-    
+
     function renderPlan(plan) {
       const container = document.getElementById('plan-view');
       const today = getTodayInWeek(plan);
-      
       let html = '<div class="theme-card">';
-      if (plan.theme) html += `<div class="theme-text">"${plan.theme}"</div>`;
-      if (plan.week) html += `<div class="theme-week">📅 ${plan.week}</div>`;
+      if (plan.theme) html += '<div class="theme-text">"' + plan.theme + '"</div>';
+      if (plan.week) html += '<div class="theme-week">📅 ' + plan.week + '</div>';
       html += '</div>';
-      
-      // Reorder: today first, then rest
-      const days = [...plan.days];
-      const todayIdx = days.findIndex(d => d.day === today);
-      const ordered = todayIdx >= 0 ? [days[todayIdx], ...days.filter((_, i) => i !== todayIdx)] : days;
-      
-      for (const day of ordered) {
+
+      for (const day of plan.days) {
         const isToday = day.day === today;
-        html += `<div class="day-card">
-          <div class="day-header">${isToday ? '👉 ' : ''}${day.day}${isToday ? ' (Today)' : ''}</div>`;
+        html += '<div class="day-card"><div class="day-header">' + (isToday ? '👉 ' : '') + day.day + (isToday ? ' (Today)' : '') + '</div>';
         for (const type of ['breakfast', 'lunch', 'dinner']) {
           const m = day[type]; if (!m) continue;
           const icon = type === 'breakfast' ? '☀️' : type === 'lunch' ? '🌤' : '🌙';
-          html += `<div class="meal-row" onclick="goToRecipe('${day.day}', '${type}')">
-            <div class="meal-type">${icon} ${type}</div>
-            <div class="meal-name">${m.name}</div>
-            <div class="meta">
-              ${m.cuisine ? `<span class="tag" style="background:${cuisineColor(m.cuisine)}">${m.cuisine}</span>` : ''}
-              ${m.cook_time ? `<span class="time">⏱ ${m.cook_time}</span>` : ''}
-              <span class="arrow">→</span>
-            </div>
-          </div>`;
+          html += '<div class="meal-row" onclick="goToRecipe(\'' + day.day + '\', \'' + type + '\')">' +
+            '<div class="meal-type">' + icon + ' ' + type + '</div>' +
+            '<div class="meal-name">' + (m.name || '') + '</div>' +
+            '<div class="meta">' +
+              (m.cuisine ? '<span class="tag" style="background:' + cuisineColor(m.cuisine) + '">' + m.cuisine + '</span>' : '') +
+              (m.cook_time ? '<span class="time">⏱ ' + m.cook_time + '</span>' : '') +
+              '<span class="arrow">→</span>' +
+            '</div></div>';
         }
         html += '</div>';
       }
       container.innerHTML = html;
     }
-    
+
     function renderRecipes(plan) {
       const container = document.getElementById('recipes-view');
       const today = getTodayInWeek(plan);
-      
-      let html = '<div class="filter-pills">';
       const filters = [['all', 'All days'], ['today', '👉 Today'], ['breakfast', '☀️ Breakfast'], ['lunch', '🌤 Lunch'], ['dinner', '🌙 Dinner']];
+      let html = '<div class="filter-pills">';
       for (const [id, label] of filters) {
-        html += `<div class="filter-pill ${recipeFilter === id ? 'active' : ''}" onclick="setFilter('${id}')">${label}</div>`;
+        if (id === 'today' && !today) continue;
+        html += '<div class="filter-pill ' + (recipeFilter === id ? 'active' : '') + '" onclick="setFilter(\'' + id + '\')">' + label + '</div>';
       }
       html += '</div>';
-      
+
       let count = 0;
       for (const day of plan.days) {
         for (const type of ['breakfast', 'lunch', 'dinner']) {
           const m = day[type]; if (!m) continue;
-          
-          // Apply filter
           if (recipeFilter === 'today' && day.day !== today) continue;
-          if (['breakfast','lunch','dinner'].includes(recipeFilter) && type !== recipeFilter) continue;
-          
+          if (['breakfast','lunch','dinner'].indexOf(recipeFilter) >= 0 && type !== recipeFilter) continue;
           count++;
           const icon = type === 'breakfast' ? '☀️' : type === 'lunch' ? '🌤' : '🌙';
-          html += `<div class="recipe-card" id="recipe-${day.day}-${type}">
-            <div class="recipe-head">${icon} ${day.day} · ${type.charAt(0).toUpperCase()+type.slice(1)}</div>
-            <div class="recipe-body">
-              <div class="recipe-name">${m.name}</div>
-              <div class="meta" style="margin-bottom:14px">
-                ${m.cuisine ? `<span class="tag" style="background:${cuisineColor(m.cuisine)}">${m.cuisine}</span>` : ''}
-                ${m.cook_time ? `<span class="time">⏱ ${m.cook_time}</span>` : ''}
-              </div>
-              ${m.description ? `<div class="recipe-desc">${m.description}</div>` : ''}
-              ${m.ingredients?.length ? `<div class="section-label">🥘 Ingredients</div><ul>${m.ingredients.map(i => `<li>${i}</li>`).join('')}</ul>` : ''}
-              ${m.instructions?.length ? `<div class="section-label">📝 Instructions</div><ol>${m.instructions.map(s => `<li>${s}</li>`).join('')}</ol>` : ''}
-              ${m.amelia_note ? `<div class="amelia-box"><strong>👶 Amelia's version</strong>${m.amelia_note}</div>` : ''}
-            </div>
-          </div>`;
+          html += '<div class="recipe-card" id="recipe-' + day.day + '-' + type + '">' +
+            '<div class="recipe-head">' + icon + ' ' + day.day + ' · ' + type.charAt(0).toUpperCase() + type.slice(1) + '</div>' +
+            '<div class="recipe-body">' +
+              '<div class="recipe-name">' + (m.name || '') + '</div>' +
+              '<div class="meta" style="margin-bottom:14px">' +
+                (m.cuisine ? '<span class="tag" style="background:' + cuisineColor(m.cuisine) + '">' + m.cuisine + '</span>' : '') +
+                (m.cook_time ? '<span class="time">⏱ ' + m.cook_time + '</span>' : '') +
+              '</div>' +
+              (m.description ? '<div class="recipe-desc">' + m.description + '</div>' : '') +
+              (m.ingredients && m.ingredients.length ? '<div class="section-label">🥘 Ingredients</div><ul>' + m.ingredients.map(i => '<li>' + i + '</li>').join('') + '</ul>' : '') +
+              (m.instructions && m.instructions.length ? '<div class="section-label">📝 Instructions</div><ol>' + m.instructions.map(s => '<li>' + s + '</li>').join('') + '</ol>' : '') +
+              (m.amelia_note ? '<div class="amelia-box"><strong>👶 Amelia\'s version</strong>' + m.amelia_note + '</div>' : '') +
+            '</div></div>';
         }
       }
-      
-      if (count === 0) {
-        html += '<div class="empty"><div class="empty-icon">🤷</div><p>No meals match this filter.</p></div>';
-      }
-      
+      if (count === 0) html += '<div class="empty"><div class="empty-icon">🤷</div><p>No meals match this filter.</p></div>';
       container.innerHTML = html;
     }
-    
+
     function setFilter(f) {
       recipeFilter = f;
       renderRecipes(currentPlan);
     }
-    
+
     function goToRecipe(day, type) {
-      // Switch to recipes tab
       document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.view === 'recipes'));
       document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'recipes-view'));
-      // Reset filter to all so the recipe is visible
       recipeFilter = 'all';
       renderRecipes(currentPlan);
-      // Scroll to the specific recipe
       setTimeout(() => {
-        const el = document.getElementById(`recipe-${day}-${type}`);
+        const el = document.getElementById('recipe-' + day + '-' + type);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
     }
-    
+
     fetch('/api/plan').then(r => r.json()).then(plan => {
       if (!plan || !plan.days || plan.days.length === 0) {
-        document.getElementById('plan-view').innerHTML = '<div class="empty"><div class="empty-icon">📅</div><p>No meal plan yet.<br>Lily will publish one soon!</p></div>';
+        document.getElementById('plan-view').innerHTML = '<div class="empty"><div class="empty-icon">📅</div><p>No meal plan yet.</p></div>';
         document.getElementById('recipes-view').innerHTML = '<div class="empty"><div class="empty-icon">📖</div><p>No recipes yet.</p></div>';
         return;
       }
@@ -246,7 +203,7 @@
       renderPlan(plan);
       renderRecipes(plan);
     }).catch(e => {
-      document.getElementById('plan-view').innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><p>Couldn't load meals.<br><small>${e.message}</small></p></div>`;
+      document.getElementById('plan-view').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><p>Couldn\'t load meals.<br><small>' + e.message + '</small></p></div>';
     });
   </script>
 </body>
