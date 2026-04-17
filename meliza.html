@@ -137,7 +137,7 @@
     
     function renderPlan(plan) {
       const container = document.getElementById('plan-view');
-      const today = todayName();
+      const today = getTodayInWeek(plan);
       
       let html = '<div class="theme-card">';
       if (plan.theme) html += `<div class="theme-text">"${plan.theme}"</div>`;
@@ -173,7 +173,7 @@
     
     function renderRecipes(plan) {
       const container = document.getElementById('recipes-view');
-      const today = todayName();
+      const today = getTodayInWeek(plan);
       
       let html = '<div class="filter-pills">';
       const filters = [['all', 'All days'], ['today', '👉 Today'], ['breakfast', '☀️ Breakfast'], ['lunch', '🌤 Lunch'], ['dinner', '🌙 Dinner']];
