@@ -141,6 +141,19 @@
     const history = [];
     let currentPlan = null;
     let currentGrocery = null;
+    // Auto-load latest plan from Notion on page open
+(async () => {
+  try {
+    const r = await fetch('/api/plan');
+    const plan = await r.json();
+    if (plan && plan.days && plan.days.length > 0) {
+      currentPlan = plan;
+      renderCalendar(plan);
+      renderRecipes(plan);
+    }
+  } catch {}
+})();
+
 
     function toast(msg) {
       const t = document.getElementById('toast');
