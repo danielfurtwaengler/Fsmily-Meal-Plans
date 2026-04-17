@@ -47,8 +47,20 @@ export default async function handler(req, res) {
 
   try {
     const { message, history = [] } = req.body;
-    const messages = [...history.slice(-10), { role: 'user', content: message }];
+    const today = new Date();
+const monday = new Date(today);
+monday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
+const friday = new Date(monday);
+friday.setDate(monday.getDate() + 4);
+const fmt = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+const weekRange = `Mon ${fmt(monday)} – Fri ${fmt(friday)}`;
 
+const dateContext = `Today is ${today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}. The current week is ${weekRange}.`;
+
+const messages = [
+  ...history.slice(-10),
+  { role: 'user', content: dateContext + '\n\n' + message }
+];
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
