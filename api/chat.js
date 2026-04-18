@@ -42,6 +42,42 @@ async function saveToNotion(plan) {
   return { saved: results.length - failed, total: results.length };
 }
 
+// ─── Read preferences from Notion page ─────────────────────────────
+async function getPreferences() {
+  if (!process.env.NOTION_PREFERENCES_PAGE_ID) return '';
+  
+  try {
+    const response = await fetch(`https://api.notion.com/v1/blocks/${process.env.NOTION_PREFERENCES_PAGE_ID}/children?page_size=100`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
+        'Notion-Version': '2022-06-28'
+      }
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to fetch preferences:', response.status);
+      return '';
+    }
+    
+    const data = await response.json();
+    const texts = [];
+    
+    for (const block of data.results || []) {
+      const content = block[block.type]?.rich_text;
+      if (content && Array.isArray(content)) {
+        const line = content.map(t => t.plain_text).join('');
+        if (line.trim()) texts.push(line);
+      }
+    }
+    
+    return texts.join('\n');
+  } catch (e) {
+    console.error('Preferences fetch error:', e.message);
+    return '';
+  }
+}
+
 // ─── JSON extractor ────────────────────────────────────────────────
 function extractJSON(text) {
   const match = text.match(/```json\s*([\s\S]*?)\s*```/);
@@ -67,13 +103,6 @@ const FAMILY_CONTEXT = [
   'Weekday meals only (Mon-Fri). Weekends eat out.',
   'Breakfast: whole family. Lunch: Amelia + Meliza (Daniel sometimes). Dinner: whole family.',
   '',
-  'VARIETY REQUIREMENTS:',
-  '- Rice max 2-3x/week. Include bread, pasta, noodles (Spätzle/ramen/udon), potatoes, couscous, tortillas',
-  '- NEVER same protein twice in one day',
-  '- Rotate cuisines: Filipino, German, Italian, Japanese, Thai, Chinese, Mexican',
-  '- Rotate breakfast: sweet (pancakes, French toast) vs savory (eggs, congee, toast)',
-  '- Include bread + cold cuts dinner 1-2x per week for Daniel',
-  '',
   'Ingredients available in Singapore: NTUC, Cold Storage, Sheng Siong, wet market.'
 ].join('\n');
 
@@ -86,7 +115,6 @@ export default async function handler(req, res) {
   try {
     const { message, history = [], mode } = req.body;
     
-    // Calculate next week's Monday-Friday
     const today = new Date();
     const dayOfWeek = today.getDay();
     const daysUntilNextMonday = (8 - dayOfWeek) % 7 || 7;
@@ -105,6 +133,12 @@ export default async function handler(req, res) {
     const isGroceryRequest = mode === 'grocery' || 
       /grocery|shopping/i.test(message);
     
+    // Fetch preferences from Notion (only for meal plans — saves latency otherwise)
+    let preferences = '';
+    if (isMealPlanRequest) {
+      preferences = await getPreferences();
+    }
+    
     let systemPrompt;
     let maxTokens = 4000;
     
@@ -113,6 +147,7 @@ export default async function handler(req, res) {
       systemPrompt = [
         FAMILY_CONTEXT,
         '',
+        preferences ? 'FAMILY PREFERENCES (follow strictly):\n' + preferences + '\n' : '',
         `The user wants a meal plan for the UPCOMING week: ${weekRange} (weekOfDate: ${weekOfDate}).`,
         '',
         'CRITICAL: Respond with ONLY a JSON object in a code block. No preamble, no explanation.',
@@ -135,8 +170,8 @@ export default async function handler(req, res) {
         '}',
         '```',
         '',
-        '15 meals total. Keep descriptions to 1 sentence. Ingredients under 10 items. Instructions under 6 steps.'
-      ].join('\n');
+        '15 meals total. Descriptions 1 sentence. Ingredients under 10 items. Instructions under 6 steps. Follow family preferences above STRICTLY.'
+      ].filter(Boolean).join('\n');
     } else if (isGroceryRequest) {
       maxTokens = 3000;
       systemPrompt = [
