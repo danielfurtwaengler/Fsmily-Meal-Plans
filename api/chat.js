@@ -48,7 +48,6 @@ function extractJSON(text) {
   if (match) {
     try { return JSON.parse(match[1]); } catch {}
   }
-  // Fallback: find outer braces
   const start = text.indexOf('{');
   const end = text.lastIndexOf('}');
   if (start !== -1 && end > start) {
@@ -57,7 +56,7 @@ function extractJSON(text) {
   return null;
 }
 
-// ─── Family context (shared across prompts) ────────────────────────
+// ─── Family context ────────────────────────────────────────────────
 const FAMILY_CONTEXT = [
   'Singapore family:',
   '- Amelia (21mo toddler): soft foods, low salt/sugar, no honey/nuts',
@@ -100,13 +99,11 @@ export default async function handler(req, res) {
     const weekRange = `Mon ${fmt(nextMonday)} – Fri ${fmt(nextFriday)}`;
     const weekOfDate = nextMonday.toISOString().split('T')[0];
     
-    // ─── MODE 1: Structured meal plan generation ─────────────────
-    // Triggered by explicit request, returns structured JSON
     const isMealPlanRequest = mode === 'plan' || 
       /meal plan|weekly plan|plan for (the |this |next )?week/i.test(message);
     
     const isGroceryRequest = mode === 'grocery' || 
-      /grocery|shopping list/i.test(message);
+      /grocery|shopping/i.test(message);
     
     let systemPrompt;
     let maxTokens = 4000;
@@ -118,7 +115,7 @@ export default async function handler(req, res) {
         '',
         `The user wants a meal plan for the UPCOMING week: ${weekRange} (weekOfDate: ${weekOfDate}).`,
         '',
-        'CRITICAL: Respond with ONLY a JSON object. No preamble, no explanation, no markdown headers. Just the JSON in a code block.',
+        'CRITICAL: Respond with ONLY a JSON object in a code block. No preamble, no explanation.',
         '',
         'Format:',
         '```json',
@@ -129,7 +126,7 @@ export default async function handler(req, res) {
         '  "days": [',
         '    {',
         '      "day": "Monday",',
-        '      "breakfast": {"name":"...","cuisine":"...","cook_time":"...","description":"1 sentence","ingredients":["item 1","item 2"],"instructions":["step 1","step 2"],"amelia_note":"toddler adaptation"},',
+        '      "breakfast": {"name":"...","cuisine":"...","cook_time":"...","description":"1 sentence","ingredients":["item 1"],"instructions":["step 1"],"amelia_note":"toddler adaptation"},',
         '      "lunch": {...same structure...},',
         '      "dinner": {...same structure...}',
         '    }',
@@ -138,36 +135,39 @@ export default async function handler(req, res) {
         '}',
         '```',
         '',
-        '15 meals total (5 days × 3 meals). Keep descriptions to 1 sentence. Keep ingredients under 10 items. Keep instructions under 6 steps. Be practical.'
+        '15 meals total. Keep descriptions to 1 sentence. Ingredients under 10 items. Instructions under 6 steps.'
       ].join('\n');
     } else if (isGroceryRequest) {
       maxTokens = 3000;
       systemPrompt = [
         FAMILY_CONTEXT,
         '',
-        'The user wants a grocery list. Generate it based on the meal plan they have.',
+        'The user wants a grocery list based on their current meal plan.',
         '',
-        'Respond with ONLY JSON in a code block:',
+        'CRITICAL: Respond with ONLY a JSON object in a code block. No preamble, no explanation.',
+        '',
+        'Format:',
         '```json',
         '{',
         '  "tip": "1-sentence shopping tip",',
         '  "pantry_check": ["item1", "item2"],',
         '  "sections": [',
-        '    {"category": "Meat & Poultry", "emoji": "🥩", "items": [{"item": "...", "quantity": "...", "note": "..."}]}',
+        '    {"category": "Meat & Poultry", "emoji": "🥩", "items": [{"item": "...", "quantity": "...", "note": "..."}]},',
+        '    {"category": "Vegetables", "emoji": "🥦", "items": [...]},',
+        '    {"category": "Dairy & Eggs", "emoji": "🥚", "items": [...]},',
+        '    {"category": "Pantry & Dry Goods", "emoji": "🛒", "items": [...]}',
         '  ]',
         '}',
         '```'
       ].join('\n');
     } else {
-      // Regular chat mode
       systemPrompt = [
         FAMILY_CONTEXT,
         '',
         `Today is ${today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}.`,
         '',
-        'You are a warm, concise family assistant. Help with meal suggestions, recipe questions, and family logistics.',
-        'Keep responses short and practical. Use bullet points for lists.',
-        'If the user asks for a full meal plan, tell them to tap the "🍽️ Full meal plan" button for best results.'
+        'You are a warm, concise family assistant. Keep responses short and practical.',
+        'If the user asks for a full meal plan, tell them to tap the "🍽️ Full meal plan" button.'
       ].join('\n');
     }
     
@@ -176,7 +176,6 @@ export default async function handler(req, res) {
       { role: 'user', content: message }
     ];
 
-    // ─── Call Claude API ─────────────────────────────────────────
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -199,7 +198,6 @@ export default async function handler(req, res) {
     
     const text = data.content?.[0]?.text || 'No response received.';
     
-    // ─── Extract structured data and save to Notion if meal plan ─
     let structuredData = null;
     let notionResult = null;
     
@@ -215,20 +213,21 @@ export default async function handler(req, res) {
       }
     }
     
-    // ─── Build a friendly reply for the chat ─────────────────────
     let replyText;
     if (isMealPlanRequest && structuredData) {
       replyText = `✨ Your meal plan for **${structuredData.week || weekRange}** is ready!\n\n_"${structuredData.theme || 'A balanced week'}"_\n\nCheck the **📅 Plan** tab to see the calendar and **📖 Recipes** tab for cooking details.${notionResult ? `\n\n_Saved ${notionResult.saved}/${notionResult.total} meals to Notion._` : ''}`;
     } else if (isGroceryRequest && structuredData) {
       const itemCount = (structuredData.sections || []).reduce((sum, s) => sum + (s.items?.length || 0), 0);
-      replyText = `🛒 Your grocery list is ready with **${itemCount} items** across **${(structuredData.sections || []).length} categories**.\n\nCheck the **🛒 Grocery** tab — you can also send it to Apple Reminders or share with Meliza on WhatsApp.`;
+      replyText = `🛒 Your grocery list is ready with **${itemCount} items** across **${(structuredData.sections || []).length} categories**.\n\nCheck the **🛒 Grocery** tab — you can send it to Apple Reminders or share with Meliza on WhatsApp.`;
+    } else if (isMealPlanRequest || isGroceryRequest) {
+      replyText = 'Had trouble generating a structured response. Please try again.';
     } else {
       replyText = text;
     }
     
     return res.status(200).json({ 
       reply: replyText,
-      data: structuredData  // frontend uses this to populate tabs
+      data: structuredData
     });
 
   } catch (err) {
