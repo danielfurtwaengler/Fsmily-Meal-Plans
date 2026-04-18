@@ -6,7 +6,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Missing Notion env vars' });
     }
     
-    // Fetch most recent 15 meals (one full week)
+    // Fetch most recent 15 meals (sorted by Week Of descending)
     const response = await fetch(`https://api.notion.com/v1/databases/${process.env.NOTION_DB_ID}/query`, {
       method: 'POST',
       headers: {
@@ -65,7 +65,6 @@ export default async function handler(req, res) {
           amelia_note: props['Amelia Note']?.rich_text?.[0]?.plain_text || ''
         };
       } catch (e) {
-        // Skip malformed entries
         console.error('Skip page:', e.message);
       }
     }
@@ -78,4 +77,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: e.message });
   }
 }
-
