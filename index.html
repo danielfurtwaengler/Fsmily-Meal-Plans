@@ -11,12 +11,12 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; overflow: hidden; }
-    body { font-family: -apple-system, system-ui, sans-serif; background: #faf7f2; display: flex; flex-direction: column; color: #1c1c1c; }
+    body { font-family: -apple-system, system-ui, sans-serif; background: #faf7f2; color: #1c1c1c; display: flex; flex-direction: column; }
     header { background: #1c1c1c; color: white; padding: 14px 20px 12px; padding-top: max(14px, env(safe-area-inset-top)); }
-    header h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+    header h1 { font-size: 17px; font-weight: 700; }
     header p { font-size: 11px; color: #9ca3af; margin-top: 2px; letter-spacing: 1px; text-transform: uppercase; }
-    .tabs { display: flex; background: #1c1c1c; padding: 0 12px; gap: 4px; }
-    .tab { flex: 1; padding: 10px 6px; background: transparent; border: none; color: #9ca3af; font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; border-bottom: 2px solid transparent; }
+    .tabs { display: flex; background: #1c1c1c; padding: 0 10px; gap: 2px; }
+    .tab { flex: 1; padding: 10px 4px; background: transparent; border: none; color: #9ca3af; font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; border-bottom: 2px solid transparent; }
     .tab.active { color: white; border-bottom-color: #a78bfa; }
     .view { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; }
     .view.active { display: flex; flex-direction: column; }
@@ -25,16 +25,10 @@
     @keyframes slideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     .user { background: #1c1c1c; color: white; align-self: flex-end; border-bottom-right-radius: 5px; }
     .assistant { background: white; color: #1c1c1c; align-self: flex-start; border-bottom-left-radius: 5px; border: 1px solid #f0ebe3; padding: 14px 16px; max-width: 92%; }
-    .assistant h2, .assistant h3 { font-weight: 700; margin: 12px 0 6px; }
-    .assistant h2 { font-size: 15px; }
-    .assistant h3 { font-size: 14px; color: #c2410c; }
     .assistant p { margin-bottom: 8px; }
-    .assistant ul, .assistant ol { margin: 6px 0 10px 20px; }
-    .assistant li { margin-bottom: 4px; }
+    .assistant p:last-child { margin-bottom: 0; }
     .assistant strong { font-weight: 600; }
     .assistant em { color: #6b7280; font-style: italic; }
-    .assistant blockquote { border-left: 3px solid #f59e0b; background: #fef3c7; padding: 8px 12px; margin: 8px 0; border-radius: 0 6px 6px 0; font-size: 13px; color: #92400e; }
-    .assistant hr { border: none; border-top: 1px solid #f0ebe3; margin: 12px 0; }
     .typing { align-self: flex-start; background: white; padding: 12px 16px; border-radius: 18px; border: 1px solid #f0ebe3; display: flex; gap: 4px; }
     .typing span { width: 7px; height: 7px; border-radius: 50%; background: #d1d5db; animation: bounce 1.2s infinite; }
     .typing span:nth-child(2) { animation-delay: 0.15s; }
@@ -48,18 +42,17 @@
     textarea:focus { border-color: #1c1c1c; background: white; }
     .send-btn { background: #1c1c1c; color: white; border: none; border-radius: 50%; width: 42px; height: 42px; font-size: 20px; cursor: pointer; flex-shrink: 0; }
     .send-btn:disabled { opacity: 0.3; }
-    .action-bar { display: flex; gap: 8px; padding: 12px 16px 4px; position: sticky; top: 0; background: #faf7f2; z-index: 10; }
-    .action-btn { flex: 1; background: white; border: 1.5px solid #1c1c1c; color: #1c1c1c; border-radius: 22px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; }
-    .action-btn.primary { background: #25d366; border-color: #25d366; color: white; }
-    .action-btn.purple { background: #f3f0ff; border-color: #c4b5fd; color: #5b21b6; }
+    .action-bar { display: flex; gap: 8px; padding: 12px 16px 4px; }
+    .action-btn { flex: 1; background: white; border: 1.5px solid #e5e7eb; color: #1c1c1c; border-radius: 22px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .action-btn.green { background: #25d366; border-color: #25d366; color: white; }
     .action-btn.blue { background: #1c1c1c; border-color: #1c1c1c; color: white; }
     .calendar-wrap { padding: 16px; }
-    .calendar-header { background: #1c1c1c; color: white; border-radius: 14px; padding: 14px 18px; margin-bottom: 12px; }
-    .calendar-theme { font-size: 15px; font-style: italic; color: #a78bfa; }
-    .calendar-week { font-size: 12px; color: #9ca3af; margin-top: 3px; }
+    .theme-card { background: #1c1c1c; color: white; border-radius: 14px; padding: 14px 18px; margin-bottom: 12px; }
+    .theme-text { font-size: 15px; font-style: italic; color: #a78bfa; }
+    .theme-week { font-size: 12px; color: #9ca3af; margin-top: 3px; }
     .day-card { background: white; border-radius: 14px; margin-bottom: 10px; overflow: hidden; border: 1px solid #f0ebe3; }
     .day-header { padding: 11px 15px; border-bottom: 1px solid #f0ebe3; font-size: 15px; font-weight: 700; background: #faf7f2; }
-    .meal-row { padding: 11px 15px; border-bottom: 1px solid #f9f6f2; }
+    .meal-row { padding: 11px 15px; border-bottom: 1px solid #f9f6f2; cursor: pointer; }
     .meal-row:last-child { border-bottom: none; }
     .meal-type { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #9ca3af; margin-bottom: 3px; }
     .meal-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
@@ -70,7 +63,7 @@
     .empty-icon { font-size: 56px; margin-bottom: 14px; }
     .empty-state p { font-size: 14px; line-height: 1.6; margin-bottom: 16px; }
     .empty-btn { background: #1c1c1c; color: white; border: none; border-radius: 22px; padding: 11px 22px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
-    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1c1c1c; color: white; padding: 10px 18px; border-radius: 22px; font-size: 13px; opacity: 0; transition: opacity 0.25s; z-index: 100; }
+    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1c1c1c; color: white; padding: 10px 18px; border-radius: 22px; font-size: 13px; opacity: 0; transition: opacity 0.25s; z-index: 100; pointer-events: none; }
     .toast.show { opacity: 1; }
   </style>
 </head>
@@ -89,12 +82,12 @@
 
   <div class="view active" id="chat-view">
     <div id="messages">
-      <div class="msg assistant">Hi Lily! 👋 Ask me for a meal plan — I'll build it with breakfast, lunch and dinner plus recipes. Once approved you can share it with Meliza on WhatsApp or send the grocery list to Apple Reminders.</div>
+      <div class="msg assistant">Hi Lily! 👋 Tap <strong>Full meal plan</strong> to generate your week. Plans auto-save to Notion and appear in the Plan, Recipes, and Grocery tabs.</div>
     </div>
     <div class="suggestions">
-      <div class="chip" onclick="send('Generate a full weekly meal plan (Mon-Fri) with breakfast, lunch and dinner. Include recipes.')">🍽️ Full meal plan</div>
-      <div class="chip" onclick="send('Generate grocery list based on the meal plan')">🛒 Grocery list</div>
-      <div class="chip" onclick="send('Swap one of the dinners for something lighter')">🔄 Adjust plan</div>
+      <div class="chip" onclick="send('Generate a full weekly meal plan', 'plan')">🍽️ Full meal plan</div>
+      <div class="chip" onclick="send('Generate grocery list for this week', 'grocery')">🛒 Grocery list</div>
+      <div class="chip" onclick="send('Quick healthy lunch ideas for Amelia')">👶 Amelia ideas</div>
     </div>
     <footer>
       <textarea id="input" rows="1" placeholder="Ask anything…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}"></textarea>
@@ -104,28 +97,27 @@
 
   <div class="view" id="calendar-view">
     <div class="action-bar" id="calendar-actions" style="display:none">
-      <button class="action-btn primary" onclick="shareWhatsApp()">💬 Send to Meliza</button>
-      <button class="action-btn purple" onclick="publishForMeliza()">🔗 Publish</button>
+      <button class="action-btn green" onclick="shareWhatsApp()">💬 Send to Meliza</button>
+      <button class="action-btn blue" onclick="location.reload()">🔄 Refresh</button>
     </div>
     <div class="calendar-wrap" id="calendar-content">
       <div class="empty-state">
         <div class="empty-icon">📅</div>
-        <p>No meal plan yet.</p>
-        <button class="empty-btn" onclick="switchTab('chat')">Go to Chat</button>
+        <p>Loading from Notion…</p>
       </div>
     </div>
   </div>
 
   <div class="view" id="recipes-view">
     <div class="calendar-wrap" id="recipes-content">
-      <div class="empty-state"><div class="empty-icon">📖</div><p>Recipes appear here once a plan is generated.</p></div>
+      <div class="empty-state"><div class="empty-icon">📖</div><p>Loading…</p></div>
     </div>
   </div>
 
   <div class="view" id="grocery-view">
     <div class="action-bar" id="grocery-actions" style="display:none">
-      <button class="action-btn blue" onclick="sendToReminders()">📋 Send to Reminders</button>
-      <button class="action-btn primary" onclick="shareGroceryWhatsApp()">💬 Share</button>
+      <button class="action-btn blue" onclick="sendToReminders()">📋 To Reminders</button>
+      <button class="action-btn green" onclick="shareGroceryWhatsApp()">💬 Share</button>
     </div>
     <div class="calendar-wrap" id="grocery-content">
       <div class="empty-state"><div class="empty-icon">🛒</div><p>Generate a grocery list from Chat.</p></div>
@@ -141,19 +133,6 @@
     const history = [];
     let currentPlan = null;
     let currentGrocery = null;
-    // Auto-load latest plan from Notion on page open
-(async () => {
-  try {
-    const r = await fetch('/api/plan');
-    const plan = await r.json();
-    if (plan && plan.days && plan.days.length > 0) {
-      currentPlan = plan;
-      renderCalendar(plan);
-      renderRecipes(plan);
-    }
-  } catch {}
-})();
-
 
     function toast(msg) {
       const t = document.getElementById('toast');
@@ -168,7 +147,8 @@
     }
     document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.view)));
 
-    function cuisineColor(c = '') {
+    function cuisineColor(c) {
+      c = c || '';
       if (/Filipino|Pinoy/i.test(c)) return '#c2410c';
       if (/German|Western|European/i.test(c)) return '#1d4ed8';
       if (/Japanese/i.test(c)) return '#be123c';
@@ -177,64 +157,37 @@
       if (/Italian/i.test(c)) return '#16a34a';
       return '#6d28d9';
     }
-    function md(text) {
-  // First strip all code blocks before any other processing
-  let cleaned = '';
-  let inCodeBlock = false;
-  const lines = text.split('\n');
-  for (const line of lines) {
-    if (line.trim().startsWith('```')) {
-      inCodeBlock = !inCodeBlock;
-      continue;
-    }
-    if (!inCodeBlock) cleaned += line + '\n';
-  }
-  
-  let html = cleaned
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-    .replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>')
-    .replace(/^---$/gm, '<hr>')
-    .replace(/(^[\-\*] .+$(\n[\-\*] .+$)*)/gm, (m) => '<ul>' + m.split('\n').map(l => '<li>' + l.replace(/^[\-\*] /, '') + '</li>').join('') + '</ul>')
-    .replace(/(^\d+\. .+$(\n\d+\. .+$)*)/gm, (m) => '<ol>' + m.split('\n').map(l => '<li>' + l.replace(/^\d+\. /, '') + '</li>').join('') + '</ol>');
-  
-  html = html.split('\n\n').map(b => {
-    if (!b.trim()) return '';
-    if (b.match(/^<(h[1-6]|ul|ol|blockquote|hr)/)) return b;
-    return '<p>' + b.replace(/\n/g, '<br>') + '</p>';
-  }).join('');
-  return html;
-}
-    function extractJSON(text) {
-      const match = text.match(/```json\s*([\s\S]*?)\s*```/);
-      if (!match) return null;
-      try { return JSON.parse(match[1]); } catch { return null; }
+
+    // Simple markdown for chat bubbles
+    function mdChat(text) {
+      return text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        .replace(/_([^_]+)_/g, '<em>$1</em>')
+        .split('\n\n').map(p => '<p>' + p.replace(/\n/g, '<br>') + '</p>').join('');
     }
 
     function renderCalendar(plan) {
       const container = document.getElementById('calendar-content');
       document.getElementById('calendar-actions').style.display = 'flex';
-      let html = '<div class="calendar-header">';
-      if (plan.theme) html += `<div class="calendar-theme">"${plan.theme}"</div>`;
-      if (plan.week) html += `<div class="calendar-week">📅 ${plan.week}</div>`;
+      let html = '<div class="theme-card">';
+      if (plan.theme) html += '<div class="theme-text">"' + plan.theme + '"</div>';
+      if (plan.week) html += '<div class="theme-week">📅 ' + plan.week + '</div>';
       html += '</div>';
-      for (const day of plan.days || []) {
-        html += `<div class="day-card"><div class="day-header">${day.day}</div>`;
+      for (const day of (plan.days || [])) {
+        html += '<div class="day-card"><div class="day-header">' + day.day + '</div>';
         for (const type of ['breakfast', 'lunch', 'dinner']) {
           const meal = day[type];
           if (!meal) continue;
           const icon = type === 'breakfast' ? '☀️' : type === 'lunch' ? '🌤' : '🌙';
-          html += `<div class="meal-row">
-            <div class="meal-type">${icon} ${type}</div>
-            <div class="meal-name">${meal.name || ''}</div>
-            <div class="meal-meta">
-              ${meal.cuisine ? `<span class="cuisine-tag" style="background:${cuisineColor(meal.cuisine)}">${meal.cuisine}</span>` : ''}
-              ${meal.cook_time ? `<span class="cook-time">⏱ ${meal.cook_time}</span>` : ''}
-            </div>
-          </div>`;
+          html += '<div class="meal-row">' +
+            '<div class="meal-type">' + icon + ' ' + type + '</div>' +
+            '<div class="meal-name">' + (meal.name || '') + '</div>' +
+            '<div class="meal-meta">' +
+              (meal.cuisine ? '<span class="cuisine-tag" style="background:' + cuisineColor(meal.cuisine) + '">' + meal.cuisine + '</span>' : '') +
+              (meal.cook_time ? '<span class="cook-time">⏱ ' + meal.cook_time + '</span>' : '') +
+            '</div></div>';
         }
         html += '</div>';
       }
@@ -244,25 +197,24 @@
     function renderRecipes(plan) {
       const container = document.getElementById('recipes-content');
       let html = '';
-      for (const day of plan.days || []) {
+      for (const day of (plan.days || [])) {
         for (const type of ['breakfast', 'lunch', 'dinner']) {
           const meal = day[type];
           if (!meal) continue;
           const icon = type === 'breakfast' ? '☀️' : type === 'lunch' ? '🌤' : '🌙';
-          html += `<div class="day-card" style="margin-bottom:12px">
-            <div class="day-header">${icon} ${day.day} · ${type.charAt(0).toUpperCase()+type.slice(1)}</div>
-            <div style="padding:14px 16px">
-              <div style="font-size:16px;font-weight:700;margin-bottom:6px">${meal.name || ''}</div>
-              <div class="meal-meta" style="margin-bottom:10px">
-                ${meal.cuisine ? `<span class="cuisine-tag" style="background:${cuisineColor(meal.cuisine)}">${meal.cuisine}</span>` : ''}
-                ${meal.cook_time ? `<span class="cook-time">⏱ ${meal.cook_time}</span>` : ''}
-              </div>
-              ${meal.description ? `<p style="font-size:13px;color:#4b5563;line-height:1.6;margin-bottom:10px">${meal.description}</p>` : ''}
-              ${meal.ingredients ? `<div style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;font-weight:600;margin-bottom:6px">Ingredients</div><ul style="margin:0 0 12px 20px;font-size:13px;line-height:1.7">${meal.ingredients.map(i => `<li>${i}</li>`).join('')}</ul>` : ''}
-              ${meal.instructions ? `<div style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;font-weight:600;margin-bottom:6px">Instructions</div><ol style="margin:0 0 10px 20px;font-size:13px;line-height:1.7">${meal.instructions.map(s => `<li>${s}</li>`).join('')}</ol>` : ''}
-              ${meal.amelia_note ? `<div style="background:#fef3c7;border-left:3px solid #f59e0b;padding:8px 10px;border-radius:0 6px 6px 0;font-size:12px;color:#92400e;line-height:1.5"><strong style="display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">👶 Amelia's version</strong>${meal.amelia_note}</div>` : ''}
-            </div>
-          </div>`;
+          html += '<div class="day-card" style="margin-bottom:12px">' +
+            '<div class="day-header">' + icon + ' ' + day.day + ' · ' + type.charAt(0).toUpperCase() + type.slice(1) + '</div>' +
+            '<div style="padding:14px 16px">' +
+              '<div style="font-size:16px;font-weight:700;margin-bottom:6px">' + (meal.name || '') + '</div>' +
+              '<div class="meal-meta" style="margin-bottom:10px">' +
+                (meal.cuisine ? '<span class="cuisine-tag" style="background:' + cuisineColor(meal.cuisine) + '">' + meal.cuisine + '</span>' : '') +
+                (meal.cook_time ? '<span class="cook-time">⏱ ' + meal.cook_time + '</span>' : '') +
+              '</div>' +
+              (meal.description ? '<p style="font-size:13px;color:#4b5563;line-height:1.6;margin-bottom:10px">' + meal.description + '</p>' : '') +
+              ((meal.ingredients && meal.ingredients.length) ? '<div style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;font-weight:600;margin-bottom:6px">Ingredients</div><ul style="margin:0 0 12px 20px;font-size:13px;line-height:1.7">' + meal.ingredients.map(i => '<li>' + i + '</li>').join('') + '</ul>' : '') +
+              ((meal.instructions && meal.instructions.length) ? '<div style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;font-weight:600;margin-bottom:6px">Instructions</div><ol style="margin:0 0 10px 20px;font-size:13px;line-height:1.7">' + meal.instructions.map(s => '<li>' + s + '</li>').join('') + '</ol>' : '') +
+              (meal.amelia_note ? '<div style="background:#fef3c7;border-left:3px solid #f59e0b;padding:8px 10px;border-radius:0 6px 6px 0;font-size:12px;color:#92400e;line-height:1.5"><strong style="display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">👶 Amelia\'s version</strong>' + meal.amelia_note + '</div>' : '') +
+            '</div></div>';
         }
       }
       container.innerHTML = html || '<div class="empty-state"><div class="empty-icon">📖</div><p>No recipes yet.</p></div>';
@@ -272,97 +224,75 @@
       const container = document.getElementById('grocery-content');
       document.getElementById('grocery-actions').style.display = 'flex';
       let html = '';
-      if (g.tip) html += `<div style="background:#f0fdf4;border-radius:12px;padding:12px 15px;margin-bottom:12px;border:1px solid #bbf7d0;font-size:13px;color:#166534;line-height:1.6">💡 ${g.tip}</div>`;
-      if (g.pantry_check?.length) {
-        html += `<div style="background:#eff6ff;border-radius:12px;padding:12px 15px;margin-bottom:10px;border:1px solid #bfdbfe"><div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#3b82f6;margin-bottom:8px;font-weight:600">✅ Check pantry first</div><div style="display:flex;flex-wrap:wrap;gap:6px">${g.pantry_check.map(x => `<span style="background:white;border:1px solid #bfdbfe;border-radius:20px;padding:3px 10px;font-size:12px;color:#1d4ed8">${x}</span>`).join('')}</div></div>`;
+      if (g.tip) html += '<div style="background:#f0fdf4;border-radius:12px;padding:12px 15px;margin-bottom:12px;border:1px solid #bbf7d0;font-size:13px;color:#166534;line-height:1.6">💡 ' + g.tip + '</div>';
+      if (g.pantry_check && g.pantry_check.length) {
+        html += '<div style="background:#eff6ff;border-radius:12px;padding:12px 15px;margin-bottom:10px;border:1px solid #bfdbfe"><div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#3b82f6;margin-bottom:8px;font-weight:600">✅ Check pantry first</div><div style="display:flex;flex-wrap:wrap;gap:6px">' + g.pantry_check.map(x => '<span style="background:white;border:1px solid #bfdbfe;border-radius:20px;padding:3px 10px;font-size:12px;color:#1d4ed8">' + x + '</span>').join('') + '</div></div>';
       }
-      for (const sec of g.sections || []) {
-        html += `<div class="day-card" style="margin-bottom:10px"><div class="day-header" style="display:flex;align-items:center;gap:9px"><span style="font-size:20px">${sec.emoji || '🛒'}</span>${sec.category}</div>`;
-        for (let i = 0; i < sec.items.length; i++) {
+      for (const sec of (g.sections || [])) {
+        html += '<div class="day-card" style="margin-bottom:10px"><div class="day-header" style="display:flex;align-items:center;gap:9px"><span style="font-size:20px">' + (sec.emoji || '🛒') + '</span>' + sec.category + '</div>';
+        for (let i = 0; i < (sec.items || []).length; i++) {
           const item = sec.items[i];
-          html += `<div style="padding:11px 15px;display:flex;justify-content:space-between;gap:10px;${i < sec.items.length - 1 ? 'border-bottom:1px solid #f9f6f2' : ''}">
-            <div><div style="font-size:14px;font-weight:500">${item.item}</div>${item.note ? `<div style="font-size:12px;color:#9ca3af;margin-top:2px">${item.note}</div>` : ''}</div>
-            <span style="font-size:12px;color:#6b7280;background:#f3f4f6;padding:3px 8px;border-radius:6px">${item.quantity || item.qty || ''}</span>
-          </div>`;
+          html += '<div style="padding:11px 15px;display:flex;justify-content:space-between;gap:10px;' + (i < sec.items.length - 1 ? 'border-bottom:1px solid #f9f6f2' : '') + '">' +
+            '<div><div style="font-size:14px;font-weight:500">' + item.item + '</div>' + (item.note ? '<div style="font-size:12px;color:#9ca3af;margin-top:2px">' + item.note + '</div>' : '') + '</div>' +
+            '<span style="font-size:12px;color:#6b7280;background:#f3f4f6;padding:3px 8px;border-radius:6px">' + (item.quantity || item.qty || '') + '</span>' +
+          '</div>';
         }
         html += '</div>';
       }
       container.innerHTML = html;
     }
 
-    // ── WhatsApp: share meal plan with Meliza ──
     function shareWhatsApp() {
       if (!currentPlan) return;
-      let text = `🍽️ *Meal Plan — ${currentPlan.week || 'This Week'}*\n`;
-      if (currentPlan.theme) text += `_"${currentPlan.theme}"_\n`;
+      let text = '🍽️ *Meal Plan — ' + (currentPlan.week || 'This Week') + '*\n';
+      if (currentPlan.theme) text += '_"' + currentPlan.theme + '"_\n';
       text += '\n';
-      for (const day of currentPlan.days || []) {
-        text += `*${day.day}*\n`;
+      for (const day of (currentPlan.days || [])) {
+        text += '*' + day.day + '*\n';
         for (const type of ['breakfast','lunch','dinner']) {
-          const meal = day[type];
-          if (!meal) continue;
+          const meal = day[type]; if (!meal) continue;
           const icon = type === 'breakfast' ? '☀️' : type === 'lunch' ? '🌤' : '🌙';
-          text += `${icon} ${type.charAt(0).toUpperCase()+type.slice(1)}: ${meal.name}`;
-          if (meal.cook_time) text += ` _(${meal.cook_time})_`;
+          text += icon + ' ' + type.charAt(0).toUpperCase() + type.slice(1) + ': ' + meal.name;
+          if (meal.cook_time) text += ' _(' + meal.cook_time + ')_';
           text += '\n';
         }
         text += '\n';
       }
-      text += `📖 Full recipes: ${window.location.origin}/meliza.html`;
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+      text += '📖 Full recipes: ' + window.location.origin + '/meliza.html';
+      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
     }
 
     function shareGroceryWhatsApp() {
       if (!currentGrocery) return;
-      let text = `🛒 *Grocery List*\n\n`;
-      if (currentGrocery.tip) text += `💡 ${currentGrocery.tip}\n\n`;
-      for (const sec of currentGrocery.sections || []) {
-        text += `*${sec.emoji || ''} ${sec.category}*\n`;
-        for (const item of sec.items) {
-          text += `• ${item.item} — ${item.quantity || item.qty || ''}${item.note ? ` (${item.note})` : ''}\n`;
+      let text = '🛒 *Grocery List*\n\n';
+      if (currentGrocery.tip) text += '💡 ' + currentGrocery.tip + '\n\n';
+      for (const sec of (currentGrocery.sections || [])) {
+        text += '*' + (sec.emoji || '') + ' ' + sec.category + '*\n';
+        for (const item of (sec.items || [])) {
+          text += '• ' + item.item + ' — ' + (item.quantity || item.qty || '') + (item.note ? ' (' + item.note + ')' : '') + '\n';
         }
         text += '\n';
       }
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
     }
 
-    // ── Publish meal plan so Meliza's URL shows it ──
-    async function publishForMeliza() {
-      if (!currentPlan) return;
-      try {
-        const res = await fetch('/api/publish', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan: currentPlan })
-        });
-        if (res.ok) {
-          toast('Published! Meliza can now view at /meliza.html');
-        } else {
-          toast('Failed to publish');
-        }
-      } catch {
-        toast('Publish failed');
-      }
-    }
-
-    // ── Apple Reminders: opens Shortcuts via URL scheme ──
     function sendToReminders() {
-  if (!currentGrocery) return;
-  const items = [];
-  for (const sec of currentGrocery.sections || []) {
-    for (const item of sec.items) {
-      items.push(`${item.item} (${item.quantity || item.qty || ''})`);
+      if (!currentGrocery) return;
+      const items = [];
+      for (const sec of (currentGrocery.sections || [])) {
+        for (const item of (sec.items || [])) {
+          items.push(item.item + ' (' + (item.quantity || item.qty || '') + ')');
+        }
+      }
+      const text = items.join('\n');
+      navigator.clipboard.writeText(text).then(() => {
+        toast('List copied — opening Shortcut…');
+        setTimeout(() => {
+          window.location.href = 'shortcuts://run-shortcut?name=Add%20Groceries&input=text&text=' + encodeURIComponent(text);
+        }, 400);
+      });
     }
-  }
-  // Pass items directly via URL with pipe separator (more reliable than newlines)
-  const text = items.join('|');
-  navigator.clipboard.writeText(items.join('\n')).then(() => {
-    toast('Opening Shortcut…');
-    setTimeout(() => {
-      window.location.href = `shortcuts://run-shortcut?name=Add%20Groceries&input=text&text=${encodeURIComponent(text)}`;
-    }, 300);
-  });
-}
+
     function addUser(text) {
       const d = document.createElement('div');
       d.className = 'msg user';
@@ -373,7 +303,7 @@
     function addAssistant(text) {
       const d = document.createElement('div');
       d.className = 'msg assistant';
-      d.innerHTML = md(text);
+      d.innerHTML = mdChat(text);
       messages.appendChild(d);
       messages.scrollTop = messages.scrollHeight;
     }
@@ -386,7 +316,7 @@
       return d;
     }
 
-    async function send(text) {
+    async function send(text, mode) {
       const msg = text || input.value.trim();
       if (!msg) return;
       input.value = ''; input.style.height = 'auto'; btn.disabled = true;
@@ -397,20 +327,29 @@
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: msg, history: history.slice(-10) })
+          body: JSON.stringify({ message: msg, history: history.slice(-8), mode: mode })
         });
         const data = await res.json();
         typing.remove();
-        addAssistant(data.reply);
-        history.push({ role: 'assistant', content: data.reply });
-        const json = extractJSON(data.reply);
-        if (json) {
-          if (json.days) { currentPlan = json; renderCalendar(json); renderRecipes(json); }
-          if (json.sections) { currentGrocery = json; renderGrocery(json); }
+        addAssistant(data.reply || 'No response.');
+        history.push({ role: 'assistant', content: data.reply || '' });
+        
+        if (data.data) {
+          if (data.data.days) { 
+            currentPlan = data.data; 
+            renderCalendar(data.data); 
+            renderRecipes(data.data); 
+            toast('Plan ready — tap 📅 Plan');
+          }
+          if (data.data.sections) { 
+            currentGrocery = data.data; 
+            renderGrocery(data.data); 
+            toast('Grocery list ready — tap 🛒');
+          }
         }
-      } catch {
+      } catch (e) {
         typing.remove();
-        addAssistant('Something went wrong.');
+        addAssistant('Something went wrong. Please try again.');
       }
       btn.disabled = false;
       input.focus();
@@ -420,6 +359,24 @@
       input.style.height = 'auto';
       input.style.height = Math.min(input.scrollHeight, 120) + 'px';
     });
+
+    // Auto-load latest plan from Notion on page open
+    (async () => {
+      try {
+        const r = await fetch('/api/plan');
+        const plan = await r.json();
+        if (plan && plan.days && plan.days.length > 0) {
+          currentPlan = plan;
+          renderCalendar(plan);
+          renderRecipes(plan);
+        } else {
+          document.getElementById('calendar-content').innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><p>No meal plan yet.</p><button class="empty-btn" onclick="switchTab(\'chat\')">Generate one</button></div>';
+          document.getElementById('recipes-content').innerHTML = '<div class="empty-state"><div class="empty-icon">📖</div><p>Generate a plan to see recipes.</p></div>';
+        }
+      } catch (e) {
+        document.getElementById('calendar-content').innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><p>No meal plan yet.</p><button class="empty-btn" onclick="switchTab(\'chat\')">Generate one</button></div>';
+      }
+    })();
   </script>
 </body>
 </html>
