@@ -1,6 +1,57 @@
-// ─── Notion save helper ────────────────────────────────────────────
+// ─── Delete existing meals for a given week ────────────────────────
+async function deleteExistingWeek(weekOf) {
+  try {
+    // Query all pages matching this Week Of date
+    const queryRes = await fetch(`https://api.notion.com/v1/databases/${process.env.NOTION_DB_ID}/query`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28'
+      },
+      body: JSON.stringify({
+        filter: { property: 'Week Of', date: { equals: weekOf } },
+        page_size: 100
+      })
+    });
+    
+    if (!queryRes.ok) {
+      console.error('Delete query failed:', queryRes.status);
+      return 0;
+    }
+    
+    const data = await queryRes.json();
+    const pages = data.results || [];
+    
+    // Archive (Notion's version of delete) each matching page
+    const deletions = pages.map(page => 
+      fetch(`https://api.notion.com/v1/pages/${page.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${process.env.NOTION_TOKEN}`,
+          'Content-Type': 'application/json',
+          'Notion-Version': '2022-06-28'
+        },
+        body: JSON.stringify({ archived: true })
+      })
+    );
+    
+    await Promise.allSettled(deletions);
+    console.log(`Deleted ${pages.length} existing entries for ${weekOf}`);
+    return pages.length;
+  } catch (e) {
+    console.error('Delete error:', e.message);
+    return 0;
+  }
+}
+
+// ─── Save plan to Notion (with auto-cleanup of same week) ──────────
 async function saveToNotion(plan) {
   const weekOf = plan.weekOfDate || new Date().toISOString().split('T')[0];
+  
+  // Delete any existing entries for this week first
+  await deleteExistingWeek(weekOf);
+  
   const promises = [];
   
   for (const day of plan.days || []) {
@@ -128,12 +179,11 @@ export default async function handler(req, res) {
     const weekOfDate = nextMonday.toISOString().split('T')[0];
     
     const isMealPlanRequest = mode === 'plan' || 
-      /meal plan|weekly plan|plan for (the |this |next )?week/i.test(message);
+      /meal plan|weekly plan|plan for (the |this |next )?week|swap|replace|change|regenerate|redo/i.test(message);
     
     const isGroceryRequest = mode === 'grocery' || 
       /grocery|shopping/i.test(message);
     
-    // Fetch preferences from Notion (only for meal plans — saves latency otherwise)
     let preferences = '';
     if (isMealPlanRequest) {
       preferences = await getPreferences();
@@ -149,6 +199,8 @@ export default async function handler(req, res) {
         '',
         preferences ? 'FAMILY PREFERENCES (follow strictly):\n' + preferences + '\n' : '',
         `The user wants a meal plan for the UPCOMING week: ${weekRange} (weekOfDate: ${weekOfDate}).`,
+        '',
+        'If the user is asking for a SWAP or CHANGE to an existing plan, regenerate the FULL week applying their request.',
         '',
         'CRITICAL: Respond with ONLY a JSON object in a code block. No preamble, no explanation.',
         '',
@@ -250,7 +302,7 @@ export default async function handler(req, res) {
     
     let replyText;
     if (isMealPlanRequest && structuredData) {
-      replyText = `✨ Your meal plan for **${structuredData.week || weekRange}** is ready!\n\n_"${structuredData.theme || 'A balanced week'}"_\n\nCheck the **📅 Plan** tab to see the calendar and **📖 Recipes** tab for cooking details.${notionResult ? `\n\n_Saved ${notionResult.saved}/${notionResult.total} meals to Notion._` : ''}`;
+      replyText = `✨ Your meal plan for **${structuredData.week || weekRange}** is ready!\n\n_"${structuredData.theme || 'A balanced week'}"_\n\nCheck the **📅 Plan** tab to see the calendar and **📖 Recipes** tab for cooking details.${notionResult ? `\n\n_Saved ${notionResult.saved}/${notionResult.total} meals to Notion (old entries for this week replaced)._` : ''}`;
     } else if (isGroceryRequest && structuredData) {
       const itemCount = (structuredData.sections || []).reduce((sum, s) => sum + (s.items?.length || 0), 0);
       replyText = `🛒 Your grocery list is ready with **${itemCount} items** across **${(structuredData.sections || []).length} categories**.\n\nCheck the **🛒 Grocery** tab — you can send it to Apple Reminders or share with Meliza on WhatsApp.`;
