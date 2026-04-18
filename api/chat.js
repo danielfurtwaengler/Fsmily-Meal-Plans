@@ -1,3 +1,4 @@
+// ─── Notion save helper ────────────────────────────────────────────
 async function saveToNotion(plan) {
   const weekOf = plan.weekOfDate || new Date().toISOString().split('T')[0];
   const promises = [];
@@ -5,7 +6,7 @@ async function saveToNotion(plan) {
   for (const day of plan.days || []) {
     for (const type of ['breakfast', 'lunch', 'dinner']) {
       const meal = day[type];
-      if (!meal) continue;
+      if (!meal || !meal.name) continue;
       
       promises.push(fetch('https://api.notion.com/v1/pages', {
         method: 'POST',
@@ -25,8 +26,8 @@ async function saveToNotion(plan) {
             'Cuisine': { select: { name: meal.cuisine || 'Other' } },
             'Cook Time': { rich_text: [{ text: { content: meal.cook_time || '' } }] },
             'Description': { rich_text: [{ text: { content: meal.description || '' } }] },
-            'Ingredients': { rich_text: [{ text: { content: (meal.ingredients || []).join('\n') } }] },
-            'Instructions': { rich_text: [{ text: { content: (meal.instructions || []).map((s, i) => `${i+1}. ${s}`).join('\n') } }] },
+            'Ingredients': { rich_text: [{ text: { content: (meal.ingredients || []).join('\n').slice(0, 2000) } }] },
+            'Instructions': { rich_text: [{ text: { content: (meal.instructions || []).map((s, i) => `${i+1}. ${s}`).join('\n').slice(0, 2000) } }] },
             'Amelia Note': { rich_text: [{ text: { content: meal.amelia_note || '' } }] },
             'Theme': { rich_text: [{ text: { content: plan.theme || '' } }] }
           }
@@ -36,18 +37,57 @@ async function saveToNotion(plan) {
   }
   
   const results = await Promise.allSettled(promises);
-  const failed = results.filter(r => r.status === 'rejected');
-  console.log(`Notion: ${results.length - failed.length}/${results.length} saved`);
+  const failed = results.filter(r => r.status === 'rejected').length;
+  console.log(`Notion save: ${results.length - failed}/${results.length} succeeded`);
+  return { saved: results.length - failed, total: results.length };
 }
 
+// ─── JSON extractor ────────────────────────────────────────────────
+function extractJSON(text) {
+  const match = text.match(/```json\s*([\s\S]*?)\s*```/);
+  if (match) {
+    try { return JSON.parse(match[1]); } catch {}
+  }
+  // Fallback: find outer braces
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start !== -1 && end > start) {
+    try { return JSON.parse(text.slice(start, end + 1)); } catch {}
+  }
+  return null;
+}
+
+// ─── Family context (shared across prompts) ────────────────────────
+const FAMILY_CONTEXT = [
+  'Singapore family:',
+  '- Amelia (21mo toddler): soft foods, low salt/sugar, no honey/nuts',
+  '- Lily (Filipino mom): loves variety',
+  '- Daniel (German dad): NO seafood (occasional fish ok), NO mustard/ketchup/pickles, bread + cold cuts 1-2x/week',
+  '- Meliza (Filipino helper): cooks everything',
+  '',
+  'Weekday meals only (Mon-Fri). Weekends eat out.',
+  'Breakfast: whole family. Lunch: Amelia + Meliza (Daniel sometimes). Dinner: whole family.',
+  '',
+  'VARIETY REQUIREMENTS:',
+  '- Rice max 2-3x/week. Include bread, pasta, noodles (Spätzle/ramen/udon), potatoes, couscous, tortillas',
+  '- NEVER same protein twice in one day',
+  '- Rotate cuisines: Filipino, German, Italian, Japanese, Thai, Chinese, Mexican',
+  '- Rotate breakfast: sweet (pancakes, French toast) vs savory (eggs, congee, toast)',
+  '- Include bread + cold cuts dinner 1-2x per week for Daniel',
+  '',
+  'Ingredients available in Singapore: NTUC, Cold Storage, Sheng Siong, wet market.'
+].join('\n');
+
+// ─── Main handler ──────────────────────────────────────────────────
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { message, history = [] } = req.body;
+    const { message, history = [], mode } = req.body;
     
+    // Calculate next week's Monday-Friday
     const today = new Date();
     const dayOfWeek = today.getDay();
     const daysUntilNextMonday = (8 - dayOfWeek) % 7 || 7;
@@ -60,54 +100,83 @@ export default async function handler(req, res) {
     const weekRange = `Mon ${fmt(nextMonday)} – Fri ${fmt(nextFriday)}`;
     const weekOfDate = nextMonday.toISOString().split('T')[0];
     
-    const dateContext = `Today is ${today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}. Plan for the UPCOMING week: ${weekRange} (weekOfDate: ${weekOfDate}).`;
+    // ─── MODE 1: Structured meal plan generation ─────────────────
+    // Triggered by explicit request, returns structured JSON
+    const isMealPlanRequest = mode === 'plan' || 
+      /meal plan|weekly plan|plan for (the |this |next )?week/i.test(message);
+    
+    const isGroceryRequest = mode === 'grocery' || 
+      /grocery|shopping list/i.test(message);
+    
+    let systemPrompt;
+    let maxTokens = 4000;
+    
+    if (isMealPlanRequest) {
+      maxTokens = 8000;
+      systemPrompt = [
+        FAMILY_CONTEXT,
+        '',
+        `The user wants a meal plan for the UPCOMING week: ${weekRange} (weekOfDate: ${weekOfDate}).`,
+        '',
+        'CRITICAL: Respond with ONLY a JSON object. No preamble, no explanation, no markdown headers. Just the JSON in a code block.',
+        '',
+        'Format:',
+        '```json',
+        '{',
+        '  "theme": "short fun weekly theme",',
+        `  "week": "${weekRange}",`,
+        `  "weekOfDate": "${weekOfDate}",`,
+        '  "days": [',
+        '    {',
+        '      "day": "Monday",',
+        '      "breakfast": {"name":"...","cuisine":"...","cook_time":"...","description":"1 sentence","ingredients":["item 1","item 2"],"instructions":["step 1","step 2"],"amelia_note":"toddler adaptation"},',
+        '      "lunch": {...same structure...},',
+        '      "dinner": {...same structure...}',
+        '    }',
+        '    ... Tuesday through Friday ...',
+        '  ]',
+        '}',
+        '```',
+        '',
+        '15 meals total (5 days × 3 meals). Keep descriptions to 1 sentence. Keep ingredients under 10 items. Keep instructions under 6 steps. Be practical.'
+      ].join('\n');
+    } else if (isGroceryRequest) {
+      maxTokens = 3000;
+      systemPrompt = [
+        FAMILY_CONTEXT,
+        '',
+        'The user wants a grocery list. Generate it based on the meal plan they have.',
+        '',
+        'Respond with ONLY JSON in a code block:',
+        '```json',
+        '{',
+        '  "tip": "1-sentence shopping tip",',
+        '  "pantry_check": ["item1", "item2"],',
+        '  "sections": [',
+        '    {"category": "Meat & Poultry", "emoji": "🥩", "items": [{"item": "...", "quantity": "...", "note": "..."}]}',
+        '  ]',
+        '}',
+        '```'
+      ].join('\n');
+    } else {
+      // Regular chat mode
+      systemPrompt = [
+        FAMILY_CONTEXT,
+        '',
+        `Today is ${today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}.`,
+        '',
+        'You are a warm, concise family assistant. Help with meal suggestions, recipe questions, and family logistics.',
+        'Keep responses short and practical. Use bullet points for lists.',
+        'If the user asks for a full meal plan, tell them to tap the "🍽️ Full meal plan" button for best results.'
+      ].join('\n');
+    }
     
     const messages = [
-      ...history.slice(-10),
-      { role: 'user', content: dateContext + '\n\n' + message }
+      ...history.slice(-8),
+      { role: 'user', content: message }
     ];
 
-    const systemPrompt = [
-      'You are a family assistant for a Singapore family.',
-      '',
-      'FAMILY:',
-      '- Amelia (21mo toddler): Soft foods, low salt/sugar, no honey/nuts.',
-      '- Lily (Filipino mom): No restrictions. Loves variety.',
-      '- Daniel (German dad): NO seafood (occasional fresh fish ok). NO mustard, NO ketchup, NO pickles. Bread + cold cuts 1-2x/week.',
-      '- Meliza (Filipino helper): Does the cooking. Fine with anything.',
-      '',
-      'MEAL STRUCTURE:',
-      '- Breakfast: Whole family',
-      '- Lunch: Amelia + Meliza (Daniel sometimes)',
-      '- Dinner: Whole family',
-      '- Mon-Fri only. ALWAYS plan for the UPCOMING week.',
-      '',
-      'CARB VARIETY (CRITICAL): Rice only 2-3x per week max. Mix with bread, pasta, noodles (Spätzle, ramen, udon), potatoes, couscous, tortillas. A good week has 4-5 different carb types.',
-      '',
-      'VARIETY RULES (CRITICAL):',
-      '- NEVER same protein twice in one day (no beef lunch + beef dinner)',
-      '- Vary proteins: chicken, pork, beef, eggs, tofu, lentils, occasional fish',
-      '- Vary cuisines: Filipino, German, Italian, Japanese, Thai, Chinese, Mexican',
-      '- Vary cooking methods and breakfast styles (sweet vs savory)',
-      '',
-      'CRITICAL OUTPUT RULES:',
-      '1. For meal plans: Write a brief 2-3 sentence friendly intro, THEN ALWAYS include a ```json code block with complete structured data. The JSON is REQUIRED — the app breaks without it.',
-      '2. For grocery lists: Brief intro, THEN ALWAYS include a ```json code block with the grocery data.',
-      '3. NEVER skip the JSON. NEVER use markdown tables or bullet lists as a replacement for the JSON. The text response is just a summary — the JSON is the real data.',
-      '',
-      'MEAL PLAN JSON FORMAT:',
-      '```json',
-      '{"theme":"...","week":"Mon 20 Apr – Fri 24 Apr","weekOfDate":"2026-04-20","days":[{"day":"Monday","breakfast":{"name":"","cuisine":"","cook_time":"","description":"","ingredients":[],"instructions":[],"amelia_note":""},"lunch":{...},"dinner":{...}},...5 days total]}',
-      '```',
-      '',
-      'GROCERY JSON FORMAT:',
-      '```json',
-      '{"tip":"...","pantry_check":["..."],"sections":[{"category":"Meat & Poultry","emoji":"🥩","items":[{"item":"...","quantity":"...","note":"..."}]}]}',
-      '```',
-      '',
-      'ALL 5 days, breakfast + lunch + dinner = 15 meals. Full ingredients and step-by-step instructions for every meal.'
-    ].join('\n');
-
+    // ─── Call Claude API ─────────────────────────────────────────
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -117,37 +186,53 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 8000,
+        max_tokens: maxTokens,
         system: systemPrompt,
         messages: messages
       })
     });
 
     const data = await response.json();
-    if (data.error) return res.status(500).json({ reply: 'API error: ' + data.error.message });
+    if (data.error) {
+      return res.status(500).json({ reply: 'API error: ' + data.error.message });
+    }
     
     const text = data.content?.[0]?.text || 'No response received.';
     
-    const match = text.match(/```json\s*([\s\S]*?)\s*```/);
-    if (match) {
-      try {
-        const parsed = JSON.parse(match[1]);
-        if (parsed.days) {
-          try {
-            await saveToNotion(parsed);
-            console.log('NOTION SUCCESS');
-          } catch (e) {
-            console.error('NOTION FAILED:', e.message);
-          }
+    // ─── Extract structured data and save to Notion if meal plan ─
+    let structuredData = null;
+    let notionResult = null;
+    
+    if (isMealPlanRequest || isGroceryRequest) {
+      structuredData = extractJSON(text);
+      
+      if (structuredData?.days && isMealPlanRequest) {
+        try {
+          notionResult = await saveToNotion(structuredData);
+        } catch (e) {
+          console.error('Notion save failed:', e.message);
         }
-      } catch (e) {
-        console.error('JSON parse failed:', e.message);
       }
     }
     
-    return res.status(200).json({ reply: text });
+    // ─── Build a friendly reply for the chat ─────────────────────
+    let replyText;
+    if (isMealPlanRequest && structuredData) {
+      replyText = `✨ Your meal plan for **${structuredData.week || weekRange}** is ready!\n\n_"${structuredData.theme || 'A balanced week'}"_\n\nCheck the **📅 Plan** tab to see the calendar and **📖 Recipes** tab for cooking details.${notionResult ? `\n\n_Saved ${notionResult.saved}/${notionResult.total} meals to Notion._` : ''}`;
+    } else if (isGroceryRequest && structuredData) {
+      const itemCount = (structuredData.sections || []).reduce((sum, s) => sum + (s.items?.length || 0), 0);
+      replyText = `🛒 Your grocery list is ready with **${itemCount} items** across **${(structuredData.sections || []).length} categories**.\n\nCheck the **🛒 Grocery** tab — you can also send it to Apple Reminders or share with Meliza on WhatsApp.`;
+    } else {
+      replyText = text;
+    }
+    
+    return res.status(200).json({ 
+      reply: replyText,
+      data: structuredData  // frontend uses this to populate tabs
+    });
 
   } catch (err) {
+    console.error('Handler error:', err);
     return res.status(500).json({ reply: 'Error: ' + err.message });
   }
 }
